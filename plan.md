@@ -148,13 +148,13 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - **Gate:** security checklist complete and deployment smoke tests pass.
 
 ### Phase 8 — Release candidate
-- [ ] Run full automated suite and static analysis/formatting configured by repository.
-- [ ] Run migration from a clean database and verify rollback strategy.
-- [ ] Validate all 32 endpoint operations against the API reference.
-- [ ] Verify Android client compatibility with real JSON contract examples.
-- [ ] Test production queue worker, scheduler, email delivery, and health monitoring.
-- [ ] No unresolved critical/high security findings.
-- [ ] Update endpoint matrix and status files with test evidence.
+- [x] Run full automated suite and static analysis/formatting configured by repository. *(610 passed; Pint passed; `composer audit` clean. No static analyzer is configured in the repository. Evidence: `operations/release-candidate.md`.)*
+- [ ] Run migration from a clean database and verify rollback strategy. *(Done on SQLite: migrate, rollback, fresh, seed. MySQL UNVERIFIED.)*
+- [x] Validate all 32 endpoint operations against the API reference. *(Evidence: `ApiReferenceContractTest`, `RouteMatrixTest`. Against the written reference only.)*
+- [ ] Verify Android client compatibility with real JSON contract examples. *(UNVERIFIED: no Android models or real payloads exist; DEC-002, DEC-008.)*
+- [ ] Test production queue worker, scheduler, email delivery, and health monitoring. *(UNVERIFIED: registration and logic tested only; needs staging.)*
+- [ ] No unresolved critical/high security findings. *(None known in code. Worker isolation, TLS, backups and MySQL-specific behavior are unverified deployment items.)*
+- [x] Update endpoint matrix and status files with test evidence. *(Done; no endpoint is DONE pending the gate below.)*
 - **Gate:** release approved only when every required endpoint has acceptance evidence.
 
 ## 6. Global acceptance criteria
