@@ -13,5 +13,8 @@ Artisan::command('inspire', function () {
 // tokens are already rejected at authentication; this only removes the rows.
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 
+// DEC-006: links stuck in pending metadata for over 15 minutes become failed (STALE_PENDING).
+Schedule::command('links:expire-stale-metadata')->everyFiveMinutes()->withoutOverlapping();
+
 // Removes Idempotency-Key records past their 24-hour replay window.
 Schedule::command('model:prune', ['--model' => [IdempotencyRecord::class]])->daily();

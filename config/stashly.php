@@ -66,6 +66,20 @@ return [
         'lock_wait_seconds' => 5,
     ],
 
+    // Metadata lookup (contract 4.2, security/ssrf.md).
+    'metadata' => [
+        'timeout_seconds' => 8,
+        'preview_timeout_seconds' => 4,
+        'max_bytes' => 512 * 1024,
+        'max_redirects' => 3,
+        // Delay before attempts 2, 3 and 4; temporary errors only (429, 5xx, timeout).
+        'retry_delays_seconds' => [120, 900, 7200],
+        'max_attempts' => 4,
+        // DEC-006: still pending this long after the request or scheduled retry -> failed.
+        'stale_after_minutes' => 15,
+        'user_agent' => 'Mozilla/5.0 (compatible; StashlyBot/1.0; link preview)',
+    ],
+
     // GET /config is cacheable for 5 minutes.
     'config_cache_seconds' => 300,
 

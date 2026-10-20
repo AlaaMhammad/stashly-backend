@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 /**
@@ -48,7 +49,10 @@ class HealthTest extends TestCase
 
     public function test_queue_failure_returns_503(): void
     {
-        // The database queue needs a "jobs" table, which does not exist here.
+        // TestCase fakes the queue; restore the real manager. The database
+        // queue needs a "jobs" table, which does not exist here.
+        Queue::clearResolvedInstance('queue');
+        $this->app->forgetInstance('queue');
         config(['queue.default' => 'database']);
 
         $this->assertFailedCheck('queue');

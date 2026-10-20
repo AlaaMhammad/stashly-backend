@@ -68,6 +68,7 @@ class UrlNormalizer
         }
 
         [$host, $port] = $this->parseAuthority($authority, $scheme);
+        [$fetchHost] = $this->parseAuthority($authority, $scheme, stripPrefix: false);
 
         $fragmentAt = strpos($remainder, '#');
         if ($fragmentAt !== false) {
@@ -75,16 +76,17 @@ class UrlNormalizer
         }
         [$path, $query] = array_pad(explode('?', $remainder, 2), 2, '');
 
-        $normalized = $scheme.'://'.$host
-            .($port !== null ? ':'.$port : '')
+        $suffix = ($port !== null ? ':'.$port : '')
             .$this->normalizeEncoding(rtrim($path, '/'))
             .$this->normalizeQuery($query);
+        $normalized = $scheme.'://'.$host.$suffix;
+        $fetchUrl = $scheme.'://'.$fetchHost.$suffix;
 
         if (mb_strlen($normalized) > $this->maxLength) {
             throw InvalidUrl::because(InvalidUrl::TOO_LONG);
         }
 
-        return new NormalizedUrl($original, $normalized, $host);
+        return new NormalizedUrl($original, $normalized, $host, $fetchUrl);
     }
 
     private function withScheme(string $url): string
@@ -102,7 +104,7 @@ class UrlNormalizer
     /**
      * @return array{0: string, 1: int|null}
      */
-    private function parseAuthority(string $authority, string $scheme): array
+    private function parseAuthority(string $authority, string $scheme, bool $stripPrefix = true): array
     {
         if (preg_match('/^\[([0-9a-f:.]+)\](?::(\d*))?$/i', $authority, $m)) {
             if (filter_var($m[1], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false) {
@@ -110,7 +112,7 @@ class UrlNormalizer
             }
             $host = '['.strtolower($m[1]).']';
         } elseif (preg_match('/^([^:\[\]]+)(?::(\d*))?$/u', $authority, $m)) {
-            $host = $this->normalizeHost($m[1]);
+            $host = $this->normalizeHost($m[1], $stripPrefix);
         } else {
             throw InvalidUrl::because(InvalidUrl::INVALID_HOST);
         }
@@ -127,7 +129,7 @@ class UrlNormalizer
         return [$host, $port];
     }
 
-    private function normalizeHost(string $host): string
+    private function normalizeHost(string $host, bool $stripPrefix = true): string
     {
         $host = rtrim(mb_strtolower($host), '.');
 
@@ -150,7 +152,7 @@ class UrlNormalizer
         }
 
         // Drop one leading www. or m., but never down to a bare suffix ("m.me" stays).
-        if (preg_match('/^(?:www|m)\.(.+)$/u', $host, $m) && str_contains($m[1], '.')) {
+        if ($stripPrefix && preg_match('/^(?:www|m)\.(.+)$/u', $host, $m) && str_contains($m[1], '.')) {
             $host = $m[1];
         }
 

@@ -125,17 +125,17 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - **Gate:** relationship integrity, count correctness, limits, and deletion semantics pass.
 
 ### Phase 6 — Metadata queue and SSRF hardening
-- [ ] Metadata job fetches HTML and extracts title, description, site name, favicon URL, preview image URL, content type.
-- [ ] State machine: pending → ready / failed / blocked.
-- [ ] Retry only temporary errors (429, 5xx, timeout), at 2 minutes, 15 minutes, 2 hours; at most 4 attempts.
-- [ ] Only ports 80/443; DNS resolve and reject private, loopback, link-local, cloud metadata IPs, and IPv6 equivalents.
-- [ ] Connect to the checked IP to reduce DNS rebinding risk.
-- [ ] Re-check every redirect; max 3 redirects.
-- [ ] Timeout 8 seconds (4 seconds for preview); maximum 512 KB HTML; HTML only; no cookies.
-- [ ] Run worker without access to internal services.
-- [ ] Never download images/video or overwrite user title/note.
-- [ ] Retry refresh max once/minute/link.
-- [ ] Scheduled cleanup marks pending metadata older than 15 minutes as recovered/failed according to documented implementation policy; expired tokens cleanup as applicable.
+- [x] Metadata job fetches HTML and extracts title, description, site name, favicon URL, preview image URL, content type. *(Evidence: `MetadataJobTest`, `Tests\Unit\Metadata\MetadataExtractorTest`; one live HTTPS lookup of example.com verified manually.)*
+- [x] State machine: pending → ready / failed / blocked. *(Evidence: `MetadataJobTest`; request-id guard makes superseded jobs no-ops.)*
+- [x] Retry only temporary errors (429, 5xx, timeout), at 2 minutes, 15 minutes, 2 hours; at most 4 attempts. *(Evidence: `MetadataJobTest::test_temporary_failures_are_retried_after_2_minutes_15_minutes_and_2_hours_then_fail`.)*
+- [x] Only ports 80/443; DNS resolve and reject private, loopback, link-local, cloud metadata IPs, and IPv6 equivalents. *(Evidence: `IpPolicyTest`, `Tests\Feature\Security\SsrfTest`.)*
+- [x] Connect to the checked IP to reduce DNS rebinding risk. *(Evidence: `CurlTransportTest::test_connection_is_pinned_to_the_given_ip_while_the_hostname_is_kept`, `SsrfTest::test_connection_is_pinned_to_the_checked_address_even_if_dns_changes`; real HTTPS with certificate check verified manually.)*
+- [x] Re-check every redirect; max 3 redirects. *(Evidence: `SsrfTest` redirect tests.)*
+- [x] Timeout 8 seconds (4 seconds for preview); maximum 512 KB HTML; HTML only; no cookies. *(Evidence: `SsrfTest`, `CurlTransportTest`. Caveat: DNS lookup time is not covered by the timeout, DEC-030.)*
+- [ ] Run worker without access to internal services. *(Application-level controls done. Network isolation is a deployment task; see `operations/deployment-and-operations.md`. UNVERIFIED.)*
+- [x] Never download images/video or overwrite user title/note. *(Evidence: only the HTML page is requested; image/favicon values are stored as URLs; `MetadataJobTest::test_success_stores_metadata_and_never_touches_the_users_title_or_note`.)*
+- [x] Retry refresh max once/minute/link. *(Done in Phase 4: `LinkItemTest`.)*
+- [x] Scheduled cleanup marks pending metadata older than 15 minutes as recovered/failed according to documented implementation policy; expired tokens cleanup as applicable. *(Evidence: `StaleMetadataTest` (DEC-006: failed / STALE_PENDING), token prune in `TokenLifecycleTest`.)*
 - **Gate:** SSRF test suite, redirect tests, timeout/size limits, queue retry behavior, and stuck-job cleanup pass.
 
 ### Phase 7 — Export, observability, and hardening

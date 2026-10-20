@@ -17,9 +17,9 @@ Initial state is `NOT STARTED`. Update status only with implementation and test 
 | Collections and relationship updates | IN PROGRESS | `CollectionTest`, `CollectionLinksTest`, `LinkRelationsTest` pass (Phase 5). Open: DEC-028, MySQL collation run (DEC-015). |
 | Tags and normalization | IN PROGRESS | `LinkRelationsTest`, `OverviewEndpointsTest` pass (Phase 5). Open: DEC-028, MySQL run. |
 | Home and search filters | IN PROGRESS | `OverviewEndpointsTest` passes (Phase 5). Open: DEC-028, DEC-029. |
-| Metadata extraction job | NOT STARTED | |
-| SSRF protections | NOT STARTED | |
+| Metadata extraction job | IN PROGRESS | `MetadataJobTest`, `MetadataExtractorTest`, `StaleMetadataTest` pass (Phase 6); live HTTPS lookup verified manually. Open: DEC-030, worker deployment and MySQL run. |
+| SSRF protections | IN PROGRESS | `IpPolicyTest`, `SsrfTest` (88), `CurlTransportTest` (real curl vs local server) pass; 19 mutation checks caught. Open: network-level worker isolation and egress limits (deployment, UNVERIFIED), blocked-attempt alerting (Phase 7), DNS time not bounded (DEC-030). |
 | Rate limiting | IN PROGRESS | Named limiters defined (api, login, register, forgot-password, link-preview, link-save, export) with 429 `RATE_LIMITED` + `Retry-After`; `RateLimitTest` passes (Phase 1). Open: refresh-preview (DEC-003); wiring to real endpoints in later phases. |
 | Password reset page and legal pages | BLOCKED | Reset page done and tested (`PasswordResetTest`). Terms/Privacy pages blocked on legal content (DEC-021). |
-| Export, monitoring, scheduled cleanup | NOT STARTED | |
+| Export, monitoring, scheduled cleanup | IN PROGRESS | Scheduled cleanup done and tested (`links:expire-stale-metadata`, token and idempotency pruning). Export (Phase 7) and monitoring not started. |
 | Production hardening | NOT STARTED | |

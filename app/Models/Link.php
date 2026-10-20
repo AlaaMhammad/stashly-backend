@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Link extends Model
 {
@@ -42,6 +43,9 @@ class Link extends Model
         'user_id',
         'normalized_url_hash',
         'search_text',
+        'metadata_request_id',
+        'metadata_pending_since',
+        'metadata_attempts',
     ];
 
     /**
@@ -69,7 +73,24 @@ class Link extends Model
         return [
             'is_favorite' => 'boolean',
             'metadata_fetched_at' => 'datetime',
+            'metadata_pending_since' => 'datetime',
         ];
+    }
+
+    /**
+     * Start a new metadata lookup: status pending, a fresh request id (which
+     * makes any job from an earlier lookup a no-op) and a new pending clock.
+     * Previously fetched metadata stays visible until the new lookup finishes.
+     */
+    public function markMetadataPending(): void
+    {
+        $this->forceFill([
+            'metadata_status' => self::STATUS_PENDING,
+            'metadata_error_code' => null,
+            'metadata_request_id' => strtolower((string) Str::ulid()),
+            'metadata_pending_since' => now(),
+            'metadata_attempts' => 0,
+        ]);
     }
 
     /**

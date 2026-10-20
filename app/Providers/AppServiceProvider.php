@@ -5,6 +5,12 @@ namespace App\Providers;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Services\Links\UrlNormalizer;
+use App\Services\Metadata\CurlTransport;
+use App\Services\Metadata\DnsResolver;
+use App\Services\Metadata\HttpTransport;
+use App\Services\Metadata\MetadataUrlGuard;
+use App\Services\Metadata\SafeFetcher;
+use App\Services\Metadata\SystemDnsResolver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -22,6 +28,15 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(UrlNormalizer::class, fn () => new UrlNormalizer(
             config('stashly.limits.url_max_length'),
+        ));
+
+        $this->app->bind(DnsResolver::class, SystemDnsResolver::class);
+        $this->app->bind(HttpTransport::class, fn () => new CurlTransport(config('stashly.metadata.user_agent')));
+        $this->app->bind(SafeFetcher::class, fn ($app) => new SafeFetcher(
+            $app->make(MetadataUrlGuard::class),
+            $app->make(HttpTransport::class),
+            config('stashly.metadata.max_bytes'),
+            config('stashly.metadata.max_redirects'),
         ));
     }
 

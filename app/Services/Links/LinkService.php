@@ -88,14 +88,15 @@ class LinkService
                     'normalized_url_hash' => $url->hash(),
                     'source_domain' => $url->host,
                     'content_type' => $this->classify($url),
-                    'metadata_status' => Link::STATUS_PENDING,
-                ])->save();
+                ]);
+                $link->markMetadataPending();
+                $link->save();
 
                 $link->collections()->attach($collectionIds);
                 $link->tags()->attach($this->tags->resolve($user, $tagNames));
                 $this->touchCollections($collectionIds);
 
-                FetchLinkMetadata::dispatch($link->id)->afterCommit();
+                FetchLinkMetadata::dispatch($link->id, $link->metadata_request_id)->afterCommit();
 
                 return $link;
             });
@@ -162,12 +163,10 @@ class LinkService
     public function refreshMetadata(Link $link): Link
     {
         DB::transaction(function () use ($link) {
-            $link->forceFill([
-                'metadata_status' => Link::STATUS_PENDING,
-                'metadata_error_code' => null,
-            ])->save();
+            $link->markMetadataPending();
+            $link->save();
 
-            FetchLinkMetadata::dispatch($link->id)->afterCommit();
+            FetchLinkMetadata::dispatch($link->id, $link->metadata_request_id)->afterCommit();
         });
 
         return $link;

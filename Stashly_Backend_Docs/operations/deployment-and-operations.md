@@ -27,6 +27,20 @@
 - [ ] Email queue delivery monitored.
 - [ ] No queue job can access internal services via arbitrary URL fetch.
 
+## Metadata worker (security-sensitive)
+The metadata job fetches arbitrary public web pages. Run it on its own queue and, where possible, on its own host or container:
+
+```bash
+php artisan queue:work --queue=metadata --tries=1 --timeout=30 --max-time=3600
+php artisan queue:work --queue=default      # mail and everything else, separate worker
+* * * * * php artisan schedule:run          # scheduler (cron)
+```
+
+- The app blocks private, loopback, link-local and cloud-metadata destinations itself, but that is defense in depth. The metadata worker should also have **no route** to the database admin port, cache, internal services or the cloud metadata address, and allow outbound traffic only on ports 80 and 443. (UNVERIFIED: infrastructure not available here.)
+- Use a low-privilege account and CPU/memory limits. `--max-time` recycles the process regularly.
+- PHP needs the `curl` extension with a CA bundle (`curl.cainfo`); there is no `intl` requirement.
+- Scheduled commands (verified registered, production cron unverified): `links:expire-stale-metadata` every 5 minutes, `sanctum:prune-expired` and `model:prune` daily.
+
 ## Monitoring
 - [ ] `/health` checks database/cache/queue as required.
 - [ ] Health returns 503 on failed required dependency.

@@ -10,6 +10,12 @@ final class NormalizedUrl
         public readonly string $normalized,
         /** Lowercased host without www./m.; stored as source_domain. */
         public readonly string $host,
+        /**
+         * What the metadata fetcher requests: the normalized URL but with the
+         * user's own host (www./m. kept), so dropping them for duplicate
+         * detection never changes which site is contacted (DEC-026).
+         */
+        public readonly string $fetchUrl,
     ) {}
 
     /**

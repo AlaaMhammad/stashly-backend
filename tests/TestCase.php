@@ -6,12 +6,37 @@ use App\Models\Link;
 use App\Models\User;
 use App\Services\Auth\TokenIssuer;
 use App\Services\Links\LinkService;
+use App\Services\Metadata\DnsResolver;
+use App\Services\Metadata\HttpTransport;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
+use Tests\Support\FakeDnsResolver;
+use Tests\Support\FakeTransport;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected FakeDnsResolver $dns;
+
+    protected FakeTransport $transport;
+
+    /**
+     * No test may reach real DNS or the network, and queued jobs only run when
+     * a test runs them explicitly: DNS and HTTP are faked, the queue is faked.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->dns = new FakeDnsResolver;
+        $this->transport = new FakeTransport;
+        $this->app->instance(DnsResolver::class, $this->dns);
+        $this->app->instance(HttpTransport::class, $this->transport);
+
+        Queue::fake();
+    }
+
     /**
      * Auth guards cache the resolved user for the life of the app instance,
      * which spans every request in a test. Call this between requests so a
