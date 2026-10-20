@@ -58,9 +58,11 @@ FLUSH PRIVILEGES;
 
 Why `ALL` on this one database only: migrations and `RefreshDatabase` create and drop tables. In production the app user needs only `SELECT, INSERT, UPDATE, DELETE` (migrations run with a separate deploy user).
 
-Proposed repository additions — **not created yet, awaiting approval:**
-1. `phpunit.mysql.xml`: same suites, with `DB_CONNECTION=mysql` (or `mariadb`), `DB_DATABASE=stashly_test`, host/user/password taken from the environment (no secrets in the file).
-2. A guard in `tests/TestCase.php`: refuse to run any test unless the connected database name ends in `_test` or is `:memory:`. `RefreshDatabase` drops all tables of the configured database, so a wrong name would destroy real data.
+Repository additions — **implemented and committed in `60e3662`:**
+1. `phpunit.mysql.xml`: same suites and settings as `phpunit.xml`. `DB_DATABASE` is forced to `stashly_test` and `DB_URL` is forced empty; `DB_CONNECTION` defaults to `mariadb` (set `DB_CONNECTION=mysql` in the shell for a MySQL run). Host, port, user and password are **not** in the file; they come from the environment. The default `phpunit.xml` (in-memory SQLite) is unchanged.
+2. `tests/Support/TestDatabaseGuard.php`, called from `tests/TestCase.php::createApplication()`. It runs before `setUpTraits()`, so before `RefreshDatabase` can migrate or drop anything, and it checks the **effective** Laravel configuration (including a `DB_URL` override). It fails closed unless the target is in-memory SQLite or a `mysql`/`mariadb` connection to a database named **exactly** `stashly_test`. Covered by `tests/Unit/TestDatabaseGuardTest.php` and `tests/Unit/PhpunitConfigurationTest.php`. The guard protects the test runner only; it does not stop a manual `artisan` command against another database.
+
+Status: the files exist and are tested with the SQLite suite (647 passed). **No MariaDB or MySQL run has been performed yet.**
 
 Proposed commands (**not executed; each needs your approval first**), with the database name **`stashly_test`**:
 
@@ -75,8 +77,8 @@ php artisan migrate --force                    # DB_DATABASE=stashly_test
 php artisan migrate:rollback --force
 php artisan migrate --force
 
-# 4. full suite against it (needs phpunit.mysql.xml + guard)
-php artisan test --configuration=phpunit.mysql.xml
+# 4. full suite against it (uses phpunit.mysql.xml; the guard refuses any database but stashly_test)
+php vendor/bin/phpunit --configuration=phpunit.mysql.xml
 ```
 
 `migrate:fresh` / `db:wipe` and any command against a database not named `stashly_test` are out of scope without explicit approval.
