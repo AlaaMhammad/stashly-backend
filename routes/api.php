@@ -1,6 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\V1\SystemController;
 use Illuminate\Support\Facades\Route;
 
-// Stashly API v1 routes are registered in Phase 1 (see Stashly_Backend_Docs/api/endpoints.md).
-// The scaffolded GET /api/user route was removed: it is not part of the API contract.
+// All routes here are served under /api/v1 (apiPrefix in bootstrap/app.php).
+// Endpoint IDs refer to Stashly_Backend_Docs/api/endpoints.md.
+
+// API-SYS-001. Not throttled: the limiter depends on the cache, and /health
+// must still answer 503 when the cache is down (DEC-019).
+Route::get('/health', [SystemController::class, 'health'])
+    ->withoutMiddleware('throttle:api');
+
+// API-SYS-002
+Route::get('/config', [SystemController::class, 'config']);

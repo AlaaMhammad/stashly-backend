@@ -65,13 +65,13 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - **Gate:** a written repository audit exists; no duplicate implementation is started blindly.
 
 ### Phase 1 — Foundation and shared API behavior
-- [ ] Configure `/api/v1` routing and JSON behavior.
-- [ ] Create consistent success/error response helpers or resources without overriding Laravel behavior unpredictably.
-- [ ] Include `request_id` in errors and correlate it with safe logs.
-- [ ] Implement ULID model keys and UTC timestamp serialization.
-- [ ] Configure health checks for database, cache, queue; return 503 when a required check fails.
-- [ ] Implement public `/config`, cache for 5 minutes, and configured terms/privacy/app versions/limits.
-- [ ] Add rate-limit definitions and `Retry-After`.
+- [x] Configure `/api/v1` routing and JSON behavior. *(Evidence: `bootstrap/app.php` apiPrefix + `ForceJsonResponse`; `ErrorEnvelopeTest`.)*
+- [x] Create consistent success/error response helpers or resources without overriding Laravel behavior unpredictably. *(Evidence: `app/Support/Api/*`; renderer applies to `api/*` only — `ErrorEnvelopeTest::test_web_routes_are_not_rendered_as_api_errors`. Provisional mappings: DEC-018.)*
+- [x] Include `request_id` in errors and correlate it with safe logs. *(Evidence: `AssignRequestId` stores it in Laravel Context, which is appended to log entries; `ErrorEnvelopeTest::test_each_request_gets_a_distinct_request_id_shared_with_log_context`.)*
+- [x] Implement ULID model keys and UTC timestamp serialization. *(Evidence: `UlidAndDateTest`, `Tests\Unit\ApiFormattingTest`. SQLite only; MySQL unverified.)*
+- [x] Configure health checks for database, cache, queue; return 503 when a required check fails. *(Evidence: `HealthTest`. 503 body shape provisional: DEC-017.)*
+- [x] Implement public `/config`, cache for 5 minutes, and configured terms/privacy/app versions/limits. *(Evidence: `ConfigTest`. `limits` key names provisional: DEC-008.)*
+- [x] Add rate-limit definitions and `Retry-After`. *(Evidence: `RateLimitTest`. Refresh-preview limiter pending DEC-003; endpoint wiring happens in later phases.)*
 - **Gate:** contract tests for envelopes, health/config, IDs/dates, and rate limiting pass.
 
 ### Phase 2 — Accounts and authentication

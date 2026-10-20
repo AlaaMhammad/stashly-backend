@@ -4,8 +4,8 @@ Update only after checking code and tests. Initial status is intentionally `NOT 
 
 | ID | Endpoint | Status | Evidence / test command | Notes |
 |---|---|---|---|---|
-| API-SYS-001 | GET /health | NOT STARTED | — | |
-| API-SYS-002 | GET /config | NOT STARTED | — | |
+| API-SYS-001 | GET /health | IN PROGRESS | `php artisan test --filter=HealthTest` (6 passed) | Implemented and tested on SQLite. DEC-017 and DEC-019 accepted provisionally (2026-10-20). Open: MySQL run unverified. |
+| API-SYS-002 | GET /config | IN PROGRESS | `php artisan test --filter=ConfigTest` (3 passed) | Implemented and tested. Open: `limits` key names (DEC-008), release values and legal URLs unset (DEC-010). |
 | API-AUTH-001 | POST /auth/register | NOT STARTED | — | |
 | API-AUTH-002 | POST /auth/login | NOT STARTED | — | |
 | API-AUTH-003 | POST /auth/logout | NOT STARTED | — | |
