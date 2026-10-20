@@ -179,4 +179,26 @@ class ProfileTest extends TestCase
         $this->assertDatabaseMissing('idempotency_records', ['user_id' => $user->id]);
         $this->assertModelExists($theirs);
     }
+
+    public function test_delete_account_removes_collections_tags_and_their_pivots(): void
+    {
+        $user = User::factory()->create();
+        $token = $this->tokenFor($user);
+        $box = $user->collections()->create(['name' => 'Box']);
+        $link = $this->saveLink($user, 'https://example.com/mine', ['collection_ids' => [$box->id], 'tags' => ['news']]);
+
+        $bystander = User::factory()->create();
+        $theirBox = $bystander->collections()->create(['name' => 'Box']);
+        $theirLink = $this->saveLink($bystander, 'https://example.com/mine', ['collection_ids' => [$theirBox->id], 'tags' => ['news']]);
+
+        $this->withToken($token)->deleteJson('/api/v1/me', ['password' => 'password'])->assertNoContent();
+
+        $this->assertDatabaseMissing('collections', ['user_id' => $user->id]);
+        $this->assertDatabaseMissing('tags', ['user_id' => $user->id]);
+        $this->assertDatabaseMissing('collection_link', ['link_id' => $link->id]);
+        $this->assertDatabaseMissing('link_tag', ['link_id' => $link->id]);
+
+        $this->assertSame(1, $theirBox->links()->count());
+        $this->assertSame(['news'], $theirLink->tags()->pluck('name')->all());
+    }
 }

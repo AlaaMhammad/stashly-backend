@@ -1,12 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CollectionController;
+use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\LinkController;
 use App\Http\Controllers\Api\V1\LinkMetadataController;
 use App\Http\Controllers\Api\V1\LinkPreviewController;
+use App\Http\Controllers\Api\V1\LinkRelationsController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\SearchFilterController;
 use App\Http\Controllers\Api\V1\SystemController;
+use App\Http\Controllers\Api\V1\TagController;
 use Illuminate\Support\Facades\Route;
 
 // All routes here are served under /api/v1 (apiPrefix in bootstrap/app.php).
@@ -60,8 +65,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/links/{link}', [LinkController::class, 'update'])->whereUlid('link');
     // API-LINK-006
     Route::delete('/links/{link}', [LinkController::class, 'destroy'])->whereUlid('link');
+    // API-LINK-007
+    Route::put('/links/{link}/collections', [LinkRelationsController::class, 'collections'])->whereUlid('link');
+    // API-LINK-008
+    Route::put('/links/{link}/tags', [LinkRelationsController::class, 'tags'])->whereUlid('link');
     // API-LINK-009
     Route::post('/links/{link}/metadata/refresh', [LinkMetadataController::class, 'refresh'])
         ->whereUlid('link')
         ->middleware('throttle:metadata-refresh');
+
+    // API-COLL-001
+    Route::get('/collections', [CollectionController::class, 'index']);
+    // API-COLL-002
+    Route::post('/collections', [CollectionController::class, 'store']);
+    // API-COLL-003
+    Route::get('/collections/{collection}', [CollectionController::class, 'show'])->whereUlid('collection');
+    // API-COLL-004
+    Route::patch('/collections/{collection}', [CollectionController::class, 'update'])->whereUlid('collection');
+    // API-COLL-005
+    Route::delete('/collections/{collection}', [CollectionController::class, 'destroy'])->whereUlid('collection');
+    // API-COLL-006
+    Route::patch('/collections/{collection}/links', [CollectionController::class, 'updateLinks'])->whereUlid('collection');
+
+    // API-TAG-001
+    Route::get('/tags', [TagController::class, 'index']);
+    // API-SRCH-001
+    Route::get('/search/filters', SearchFilterController::class);
+    // API-HOME-001
+    Route::get('/home', HomeController::class);
+    // API-PROF-003
+    Route::get('/me/stats', [ProfileController::class, 'stats']);
 });

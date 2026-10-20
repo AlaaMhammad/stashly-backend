@@ -225,10 +225,41 @@ class ListLinksTest extends TestCase
         $this->assertApiError($this->getJson('/api/v1/links?saved_within_days=14'), 422, 'VALIDATION_FAILED');
     }
 
-    public function test_collection_and_tag_filters_are_not_available_yet(): void
+    public function test_collection_filter_matches_any_of_the_given_collections(): void
     {
-        $this->assertApiError($this->getJson('/api/v1/links?collection_id=01JAAAAAAAAAAAAAAAAAAAAAAA'), 422, 'VALIDATION_FAILED');
-        $this->assertApiError($this->getJson('/api/v1/links?tags=news'), 422, 'VALIDATION_FAILED');
+        $a = $this->user->collections()->create(['name' => 'A']);
+        $b = $this->user->collections()->create(['name' => 'B']);
+        $inA = $this->saveLink($this->user, 'https://example.com/a', ['collection_ids' => [$a->id]]);
+        $inB = $this->saveLink($this->user, 'https://example.com/b', ['collection_ids' => [$b->id]]);
+        $this->saveLink($this->user, 'https://example.com/unsorted');
+
+        $this->assertSame([$inA->id], $this->ids($this->getJson("/api/v1/links?collection_id={$a->id}")));
+        $this->assertEqualsCanonicalizing([$inA->id, $inB->id], $this->ids($this->getJson("/api/v1/links?collection_id={$a->id},".strtoupper($b->id))));
+    }
+
+    public function test_collection_filter_with_another_users_collection_matches_nothing(): void
+    {
+        $other = User::factory()->create();
+        $theirs = $other->collections()->create(['name' => 'Theirs']);
+        $this->saveLink($other, 'https://example.com/theirs', ['collection_ids' => [$theirs->id]]);
+        $this->saveLink($this->user, 'https://example.com/mine');
+
+        $this->getJson("/api/v1/links?collection_id={$theirs->id}")
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0)
+            ->assertJsonPath('data', []);
+    }
+
+    public function test_several_tags_must_all_match(): void
+    {
+        $both = $this->saveLink($this->user, 'https://example.com/both', ['tags' => ['news', 'Tech']]);
+        $newsOnly = $this->saveLink($this->user, 'https://example.com/news', ['tags' => ['news']]);
+        $this->saveLink($this->user, 'https://example.com/none');
+
+        $this->assertEqualsCanonicalizing([$both->id, $newsOnly->id], $this->ids($this->getJson('/api/v1/links?tags=news')));
+        // Normalized like stored tags: case, leading # and spaces are ignored.
+        $this->assertSame([$both->id], $this->ids($this->getJson('/api/v1/links?tags='.urlencode('#News, tech'))));
+        $this->assertSame([], $this->ids($this->getJson('/api/v1/links?tags=news,missing')));
     }
 
     public function test_search_requires_every_word_across_all_searchable_fields(): void

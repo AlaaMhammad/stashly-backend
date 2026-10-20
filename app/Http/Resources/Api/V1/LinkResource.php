@@ -2,13 +2,16 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Models\Collection;
 use App\Models\Link;
+use App\Models\Tag;
 use App\Support\Api\ApiDate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Shared "link" object (contract 1.2).
+ * Shared "link" object (contract 1.2). Lists eager-load collections and tags;
+ * loadMissing only queries for a single link.
  *
  * @mixin Link
  */
@@ -19,6 +22,8 @@ class LinkResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $this->resource->loadMissing(['collections', 'tags']);
+
         return [
             'id' => $this->id,
             'original_url' => $this->original_url,
@@ -39,10 +44,9 @@ class LinkResource extends JsonResource
                 'fetched_at' => $this->metadata_fetched_at ? ApiDate::format($this->metadata_fetched_at) : null,
                 'error_code' => $this->metadata_error_code,
             ],
-            // Collections and tags arrive in Phase 5; until then a link has none.
-            'collections' => [],
-            'collections_count' => 0,
-            'tags' => [],
+            'collections' => $this->collections->map(fn (Collection $c) => ['id' => $c->id, 'name' => $c->name])->values()->all(),
+            'collections_count' => $this->collections->count(),
+            'tags' => $this->tags->map(fn (Tag $t) => $t->name)->values()->all(),
             'created_at' => ApiDate::format($this->created_at),
             'updated_at' => ApiDate::format($this->updated_at),
         ];

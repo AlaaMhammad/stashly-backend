@@ -90,7 +90,7 @@ class LinkController extends Controller
      */
     public function destroy(Request $request, string $link): Response
     {
-        $this->links->findOwned($request->user(), $link)->delete();
+        $this->links->delete($this->links->findOwned($request->user(), $link));
 
         return response()->noContent();
     }

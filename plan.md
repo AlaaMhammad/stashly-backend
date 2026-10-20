@@ -83,7 +83,7 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [x] Forgot password always returns the same 200 response regardless of account existence; queue email delivery. *(Evidence: `PasswordResetTest`.)*
 - [x] Reset token expires after 60 minutes, single-use; successful reset revokes all tokens. *(Evidence: `PasswordResetTest`.)*
 - [x] Change password verifies current password, requires new password to differ, revokes other tokens. *(Evidence: `ProfileTest`.)*
-- [ ] `GET /me`, `PATCH /me`, `GET /me/stats`. *(`GET /me` and `PATCH /me` done: `ProfileTest`. `GET /me/stats` deferred: it counts links and collections, whose tables arrive in Phases 3-5.)*
+- [x] `GET /me`, `PATCH /me`, `GET /me/stats`. *(Evidence: `ProfileTest`; `/me/stats` added in Phase 5: `OverviewEndpointsTest::test_me_stats`.)*
 - [x] Delete account only after password verification and remove all associated data/tokens. *(Evidence: `ProfileTest`. Every later user-owned table must use `cascadeOnDelete()` and extend the deletion test.)*
 - [ ] Implement the password reset web page and Terms/Privacy pages/URLs. *(Reset page done: `PasswordResetTest`. Terms/Privacy pages BLOCKED on legal content: DEC-021. Their URLs are already configurable via `STASHLY_TERMS_URL` / `STASHLY_PRIVACY_URL`.)*
 - **Gate:** auth feature tests cover success, validation, rate limits, token expiry/rotation/revocation, enumeration resistance, and deletion.
@@ -103,25 +103,25 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 
 ### Phase 4 — Link library operations
 - [x] Cursor-paginated `GET /links`, default 20/max 50, newest first. *(Evidence: `ListLinksTest`; keyset on (created_at, id), signed cursor bound to user + filters.)*
-- [ ] Implement filters: q, favorite, content_type, source/domain, collection_id, tags, saved_within_days, sort. *(All except `collection_id` and `tags` done: `ListLinksTest`. Those two return 422 until Phase 5 creates collections and tags.)*
-- [ ] Several tags use AND (link must have all); values within other same filter use OR; different filter categories combine with AND. *(OR within a filter and AND across filters done: `ListLinksTest`. Tag AND lands with tags in Phase 5.)*
+- [x] Implement filters: q, favorite, content_type, source/domain, collection_id, tags, saved_within_days, sort. *(Evidence: `ListLinksTest`; `collection_id` and `tags` added in Phase 5.)*
+- [x] Several tags use AND (link must have all); values within other same filter use OR; different filter categories combine with AND. *(Evidence: `ListLinksTest::test_several_tags_must_all_match`, `test_values_within_one_filter_are_ored`, `test_different_filters_are_anded`.)*
 - [x] Search title, fetched title, description, note, and domain; case-insensitive and Arabic-aware (diacritic handling and alef normalization). *(Evidence: `ListLinksTest` search tests, `Tests\Unit\SearchTextTest`.)*
-- [ ] Detail endpoint includes metadata, collections, tags. *(Endpoint done: `LinkItemTest`. `collections` and `tags` are always empty until Phase 5.)*
+- [x] Detail endpoint includes metadata, collections, tags. *(Evidence: `LinkItemTest`, `LinkRelationsTest`.)*
 - [x] PATCH only permits title, note, is_favorite; null/empty clears title/note; reject read-only fields. *(Evidence: `LinkItemTest`; every non-editable body field is rejected.)*
 - [x] Delete link. *(Evidence: `LinkItemTest::test_delete_removes_the_link_permanently`.)*
-- [ ] Replace link collections atomically; empty array means Unsorted. *(Moved to Phase 5: needs the collections table.)*
-- [ ] Replace link tags; normalize tags per user; delete tags that have no linked links. *(Moved to Phase 5: needs the tags table.)*
+- [x] Replace link collections atomically; empty array means Unsorted. *(Done in Phase 5. Evidence: `LinkRelationsTest`.)*
+- [x] Replace link tags; normalize tags per user; delete tags that have no linked links. *(Done in Phase 5. Evidence: `LinkRelationsTest`; deleting a link also prunes its unused tags.)*
 - [x] Refresh metadata endpoint, max once/minute/link. *(Evidence: `LinkItemTest` refresh tests; also 5/min per user (DEC-003). The job it queues is a Phase 6 placeholder.)*
 - **Gate:** filtering combinations, ownership isolation, read-only field rejection, and cursor validity tests pass.
 
 ### Phase 5 — Collections, tags, home, filter options
-- [ ] Collections list with counts and up to four cover image URLs.
-- [ ] Create collection: name 1–60, description max 300, case-insensitive unique per user, max 100 per user.
-- [ ] Detail, update, delete; deleting collection preserves links and links without another collection become Unsorted.
-- [ ] Atomic attach/detach endpoint; max 100 IDs in each list and at least one non-empty.
-- [ ] Tags list with prefix search, usage counts, sort, max 100.
-- [ ] Filter options endpoint with counts.
-- [ ] Home endpoint with recent limit default 10/max 20.
+- [x] Collections list with counts and up to four cover image URLs. *(Evidence: `CollectionTest`; covers per DEC-012; fixed query count verified.)*
+- [x] Create collection: name 1–60, description max 300, case-insensitive unique per user, max 100 per user. *(Evidence: `CollectionTest`; unique index on lowercased `name_key` (binary collation on MySQL); user-row lock serializes the 100 check; 101st → `LIMIT_EXCEEDED`.)*
+- [x] Detail, update, delete; deleting collection preserves links and links without another collection become Unsorted. *(Evidence: `CollectionTest::test_delete_keeps_links_and_leaves_them_unsorted_or_in_other_collections`.)*
+- [x] Atomic attach/detach endpoint; max 100 IDs in each list and at least one non-empty. *(Evidence: `CollectionLinksTest`; a foreign id fails the whole request.)*
+- [x] Tags list with prefix search, usage counts, sort, max 100. *(Evidence: `OverviewEndpointsTest`.)*
+- [x] Filter options endpoint with counts. *(Evidence: `OverviewEndpointsTest`; option shapes provisional, DEC-028.)*
+- [x] Home endpoint with recent limit default 10/max 20. *(Evidence: `OverviewEndpointsTest`; quick_access rule provisional, DEC-029.)*
 - **Gate:** relationship integrity, count correctness, limits, and deletion semantics pass.
 
 ### Phase 6 — Metadata queue and SSRF hardening

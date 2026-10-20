@@ -63,6 +63,22 @@ class User extends Authenticatable
         return $this->hasMany(Link::class);
     }
 
+    /**
+     * @return HasMany<Collection, $this>
+     */
+    public function collections(): HasMany
+    {
+        return $this->hasMany(Collection::class);
+    }
+
+    /**
+     * @return HasMany<Tag, $this>
+     */
+    public function tags(): HasMany
+    {
+        return $this->hasMany(Tag::class);
+    }
+
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));

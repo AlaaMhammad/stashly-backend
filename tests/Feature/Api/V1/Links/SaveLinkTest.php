@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Links\ContentTypeClassifier;
 use App\Services\Links\LinkService;
 use App\Services\Links\UrlNormalizer;
+use App\Services\Tags\TagService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
@@ -131,7 +132,7 @@ class SaveLinkTest extends TestCase
 
         // Simulate the race: the request's duplicate check runs before the other
         // save commits, so only the unique index can catch it.
-        $service = Mockery::mock(LinkService::class, [app(UrlNormalizer::class), app(ContentTypeClassifier::class)])
+        $service = Mockery::mock(LinkService::class, [app(UrlNormalizer::class), app(ContentTypeClassifier::class), app(TagService::class)])
             ->makePartial();
         $service->shouldReceive('findDuplicate')->andReturn(null, $existing);
         $this->instance(LinkService::class, $service);
@@ -183,8 +184,10 @@ class SaveLinkTest extends TestCase
             'title 301 chars' => [['url' => 'example.com', 'title' => str_repeat('t', 301)], 'title'],
             'note 2001 chars' => [['url' => 'example.com', 'note' => str_repeat('n', 2001)], 'note'],
             'non-boolean favorite' => [['url' => 'example.com', 'is_favorite' => 'maybe'], 'is_favorite'],
-            'collections not yet supported' => [['url' => 'example.com', 'collection_ids' => ['01JAAAAAAAAAAAAAAAAAAAAAAA']], 'collection_ids'],
-            'tags not yet supported' => [['url' => 'example.com', 'tags' => ['news']], 'tags'],
+            'unknown collection' => [['url' => 'example.com', 'collection_ids' => ['01JAAAAAAAAAAAAAAAAAAAAAAA']], 'collection_ids.0'],
+            'non-string tag' => [['url' => 'example.com', 'tags' => [['x']]], 'tags.0'],
+            'empty tag' => [['url' => 'example.com', 'tags' => ['#  ']], 'tags.0'],
+            'tag 41 chars' => [['url' => 'example.com', 'tags' => [str_repeat('t', 41)]], 'tags.0'],
         ];
     }
 

@@ -12,8 +12,8 @@ use Illuminate\Validation\Rule;
  * API-LINK-003 query: q, favorite, content_type, source, collection_id, tags,
  * saved_within_days (7|30), sort (newest|oldest), limit (1-50), cursor.
  *
- * content_type and source take comma lists (OR). collection_id and tags are
- * rejected until collections and tags exist (Phase 5, DEC-024).
+ * content_type, source and collection_id take comma lists (OR); tags takes a
+ * comma list that must all match (AND).
  */
 class ListLinksRequest extends FormRequest
 {
@@ -31,23 +31,12 @@ class ListLinksRequest extends FormRequest
                 }
             }],
             'source' => ['nullable', 'string', 'max:2000'],
-            'collection_id' => ['prohibited'],
-            'tags' => ['prohibited'],
+            'collection_id' => ['nullable', 'string', 'max:2000'],
+            'tags' => ['nullable', 'string', 'max:2000'],
             'saved_within_days' => ['nullable', Rule::in(['7', '30'])],
             'sort' => ['nullable', Rule::in([LinkFilters::SORT_NEWEST, LinkFilters::SORT_OLDEST])],
             'limit' => ['nullable', 'integer', 'min:1', 'max:'.config('stashly.limits.page_size_max')],
             'cursor' => ['nullable', 'string', 'max:2000'],
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'collection_id.prohibited' => 'Filtering by collection is not available yet.',
-            'tags.prohibited' => 'Filtering by tags is not available yet.',
         ];
     }
 }

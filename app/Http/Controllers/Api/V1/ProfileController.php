@@ -25,6 +25,20 @@ class ProfileController extends Controller
     }
 
     /**
+     * API-PROF-003: 200 {links_count, collections_count, favorites_count}.
+     */
+    public function stats(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return ApiResponse::data([
+            'links_count' => $user->links()->count(),
+            'collections_count' => $user->collections()->count(),
+            'favorites_count' => $user->links()->where('is_favorite', true)->count(),
+        ]);
+    }
+
+    /**
      * API-PROF-002: change the display name.
      */
     public function update(UpdateProfileRequest $request): JsonResponse
