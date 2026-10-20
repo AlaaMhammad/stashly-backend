@@ -2,6 +2,7 @@
 
 namespace App\Support\Api;
 
+use App\Http\Middleware\ApiSecurityHeaders;
 use Illuminate\Http\JsonResponse;
 use stdClass;
 
@@ -48,7 +49,7 @@ final class ApiError
         array $details = [],
         array $headers = [],
     ): JsonResponse {
-        return new JsonResponse([
+        return ApiSecurityHeaders::apply(new JsonResponse([
             'error' => [
                 'code' => $code,
                 'message' => $message,
@@ -56,6 +57,6 @@ final class ApiError
                 'details' => $details === [] ? new stdClass : $details,
                 'request_id' => RequestId::current(),
             ],
-        ], $status, $headers);
+        ], $status, $headers), request());
     }
 }

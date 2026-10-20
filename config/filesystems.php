@@ -33,7 +33,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            'serve' => false, // No files are served from local disk (DEC-016).
             'throw' => false,
             'report' => false,
         ],

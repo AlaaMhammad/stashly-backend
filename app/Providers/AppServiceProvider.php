@@ -14,7 +14,12 @@ use App\Services\Metadata\SystemDnsResolver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Queue\Events\QueueBusy;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
@@ -51,6 +56,21 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::createUrlUsing(fn (User $user, string $token) => url('/reset-password').'?'.http_build_query([
             'token' => $token,
             'email' => $user->getEmailForPasswordReset(),
+        ]));
+
+        if ($this->app->isProduction()) {
+            URL::forceScheme('https');
+        }
+
+        // Observability: failed jobs and queue backlog become log entries (no payloads, no URLs).
+        Event::listen(JobFailed::class, fn (JobFailed $e) => Log::error('Queue job failed.', [
+            'job' => $e->job->resolveName(),
+            'queue' => $e->job->getQueue(),
+            'exception' => $e->exception::class,
+        ]));
+        Event::listen(QueueBusy::class, fn (QueueBusy $e) => Log::warning('Queue backlog.', [
+            'queue' => $e->queue,
+            'size' => $e->size,
         ]));
 
         $this->configureRateLimiting();

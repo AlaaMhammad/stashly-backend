@@ -3,26 +3,26 @@
 ## Environment
 - [x] PHP 8.2 and Laravel 12 compatibility verified. *(Local CLI only: PHP 8.2.12, Laravel 12.70.0; see `project-audit.md`. Re-verify on each deployment target.)*
 - [ ] MySQL version/collation recorded and supported.
-- [ ] Production `.env` is not committed.
-- [ ] `APP_DEBUG=false`; HTTPS enforced.
+- [x] Production `.env` is not committed. *(`.env` is git-ignored; `.env.example` has placeholders only.)*
+- [ ] `APP_DEBUG=false`; HTTPS enforced. *(`php artisan stashly:preflight` checks debug, `APP_ENV`, https `APP_URL`; the app forces https URLs and sends HSTS in production. Enforcing HTTPS at the edge is a deployment task.)*
 - [ ] Database user has least required privileges.
 - [ ] Mail transport configured and tested.
 - [ ] Queue and cache drivers configured intentionally.
 - [ ] `APP_URL`, API base URL, Terms/Privacy URLs, and app version values verified.
-- [ ] CORS restricted to intended origins.
+- [x] CORS restricted to intended origins. *(`config/cors.php`: no origin allowed unless `CORS_ALLOWED_ORIGINS` lists it; credentials off. `HardeningTest`.)*
 
 ## Database and deploy
 - [ ] Backup before production migration.
 - [ ] Migrations run successfully from clean state in CI.
 - [ ] Migration rollback/recovery plan documented.
 - [ ] Indexes/unique constraints verified on MySQL.
-- [ ] Account deletion and export behavior validated.
+- [ ] Account deletion and export behavior validated. *(Automated: `ProfileTest`, `ExportTest`. Still to do: validate in staging.)*
 - [ ] Restore from backup tested periodically.
 
 ## Queue and scheduler
 - [ ] Queue worker supervised and restarted on deploy.
 - [ ] Failed jobs monitored and reviewed.
-- [ ] Scheduled cleanup registered and verified.
+- [x] Scheduled cleanup registered and verified. *(Registration verified in tests; the production cron entry for `schedule:run` is UNVERIFIED.)*
 - [ ] Metadata job egress restrictions active.
 - [ ] Email queue delivery monitored.
 - [ ] No queue job can access internal services via arbitrary URL fetch.
@@ -41,13 +41,23 @@ php artisan queue:work --queue=default      # mail and everything else, separate
 - PHP needs the `curl` extension with a CA bundle (`curl.cainfo`); there is no `intl` requirement.
 - Scheduled commands (verified registered, production cron unverified): `links:expire-stale-metadata` every 5 minutes, `sanctum:prune-expired` and `model:prune` daily.
 
+## Configuration reference (security-relevant)
+| Variable | Purpose |
+|---|---|
+| `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://...` | Required in production (`php artisan stashly:preflight` fails otherwise) |
+| `TRUSTED_PROXIES` | Load balancer IPs/CIDRs allowed to set `X-Forwarded-For`. Unset = none trusted. Rate limits are per client IP, so set this behind a proxy |
+| `CORS_ALLOWED_ORIGINS` | Browser origins allowed to call the API. Empty = none (the Android app needs none) |
+| `STASHLY_*` | Terms/Privacy URLs, terms version, minimum and latest app versions (`GET /config`) |
+
+Run `php artisan stashly:preflight` after every deploy: it exits non-zero on FAIL and never prints secrets.
+
 ## Monitoring
-- [ ] `/health` checks database/cache/queue as required.
-- [ ] Health returns 503 on failed required dependency.
-- [ ] Request IDs appear in safe logs and error responses.
+- [x] `/health` checks database/cache/queue as required. *(`HealthTest`.)*
+- [x] Health returns 503 on failed required dependency. *(`HealthTest`.)*
+- [x] Request IDs appear in safe logs and error responses. *(`ErrorEnvelopeTest`, `ObservabilityTest`.)*
 - [ ] Alerting for queue backlog, repeated failures, and service outage.
 - [ ] Rate limiting and blocked SSRF attempts observable.
-- [ ] Logs exclude passwords, tokens, reset tokens, and full URLs.
+- [x] Logs exclude passwords, tokens, reset tokens, and full URLs. *(`ObservabilityTest`.)*
 
 ## Release smoke tests
 - [ ] Register/login/me/logout.

@@ -93,6 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/search/filters', SearchFilterController::class);
     // API-HOME-001
     Route::get('/home', HomeController::class);
+    // API-PROF-004
+    Route::get('/me/export', [ProfileController::class, 'export'])->middleware('throttle:export');
     // API-PROF-003
     Route::get('/me/stats', [ProfileController::class, 'stats']);
 });

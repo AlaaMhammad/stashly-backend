@@ -16,7 +16,7 @@ Update only after checking code and tests. Initial status is intentionally `NOT 
 | API-PROF-001 | GET /me | IN PROGRESS | `php artisan test --filter=ProfileTest` | Implemented and tested on SQLite; MySQL run unverified (DEC-015). |
 | API-PROF-002 | PATCH /me | IN PROGRESS | `php artisan test --filter=ProfileTest` | Implemented and tested on SQLite; MySQL run unverified (DEC-015). Sending `email` is rejected (DEC-022). |
 | API-PROF-003 | GET /me/stats | IN PROGRESS | `php artisan test --filter=OverviewEndpointsTest` | SQLite only; MySQL unverified (DEC-015). |
-| API-PROF-004 | GET /me/export | NOT STARTED | — | |
+| API-PROF-004 | GET /me/export | IN PROGRESS | `php artisan test --filter=ExportTest` | JSON attachment, schema version 1 (DEC-013), streamed, own data only, 1/10 min. SQLite only; MySQL unverified (DEC-015). |
 | API-PROF-005 | DELETE /me | IN PROGRESS | `php artisan test --filter=ProfileTest` | Implemented and tested on SQLite; MySQL run unverified (DEC-015). Later user-owned tables must cascade and extend the test. |
 | API-LINK-001 | POST /links/preview | IN PROGRESS | `php artisan test --filter=LinkPreviewTest` | Live lookup within 4 s for unsaved URLs; saved URLs return their stored metadata; failures give `metadata: null` (DEC-030). Plan Phase 3 item for the 4 s fetch is now met, DNS time excluded. SQLite only; MySQL unverified (DEC-015). |
 | API-LINK-002 | POST /links | IN PROGRESS | `php artisan test --filter="SaveLinkTest\|IdempotencyTest\|LinkRelationsTest\|MetadataJobTest"` | Queues the metadata job on the `metadata` queue after commit; the real job now fetches. SQLite only; MySQL unverified (DEC-015). |

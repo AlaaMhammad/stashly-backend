@@ -139,12 +139,12 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - **Gate:** SSRF test suite, redirect tests, timeout/size limits, queue retry behavior, and stuck-job cleanup pass.
 
 ### Phase 7 — Export, observability, and hardening
-- [ ] Export all user data as a JSON attachment; limit 1 per 10 minutes.
-- [ ] Ensure export includes only the authenticated user's data and agreed data schema.
-- [ ] Verify all rate limits: login 5/min email+IP; register 10/hour/IP; forgot password 3/hour/email; preview 20/min; save 60/min; refresh-preview 5/min; export 1/10 min; all other endpoints 120/min/user.
-- [ ] Structured safe logs, request IDs, health monitoring, queue failure monitoring.
-- [ ] Verify no passwords, tokens, or full URLs appear in logs.
-- [ ] Review CORS, HTTPS, secrets, debug mode, database least privilege, queue worker isolation, backup/restore.
+- [x] Export all user data as a JSON attachment; limit 1 per 10 minutes. *(Evidence: `ExportTest`; streamed in keyset chunks, 1203-link library verified.)*
+- [x] Ensure export includes only the authenticated user's data and agreed data schema. *(Evidence: `ExportTest::test_never_contains_another_users_data_or_any_secret`, schema version 1: DEC-013 accepted provisionally.)*
+- [x] Verify all rate limits: login 5/min email+IP; register 10/hour/IP; forgot password 3/hour/email; preview 20/min; save 60/min; refresh-preview 5/min; export 1/10 min; all other endpoints 120/min/user. *(Evidence: `RateLimitTest`, per-endpoint tests, and `RouteMatrixTest` which checks every one of the 32 routes has exactly the contract limiters. Per-IP keys need `TRUSTED_PROXIES` behind a load balancer.)*
+- [x] Structured safe logs, request IDs, health monitoring, queue failure monitoring. *(Evidence: `ObservabilityTest` (request id in log context, failed-job and backlog entries, `queue:monitor` every minute), `HealthTest`. Alert delivery itself is infrastructure: UNVERIFIED.)*
+- [x] Verify no passwords, tokens, or full URLs appear in logs. *(Evidence: `ObservabilityTest::test_logs_never_contain_secrets_emails_or_urls_across_all_flows`, `SensitiveDataLoggingTest`; database errors log only SQLSTATE.)*
+- [ ] Review CORS, HTTPS, secrets, debug mode, database least privilege, queue worker isolation, backup/restore. *(Code-level done: CORS closed by default, HSTS + HTTPS URL forcing in production, `stashly:preflight`, generic errors with debug on/off. UNVERIFIED, deployment: TLS termination, DB privileges, worker isolation, backup/restore.)*
 - **Gate:** security checklist complete and deployment smoke tests pass.
 
 ### Phase 8 — Release candidate
