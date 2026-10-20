@@ -75,17 +75,17 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - **Gate:** contract tests for envelopes, health/config, IDs/dates, and rate limiting pass.
 
 ### Phase 2 — Accounts and authentication
-- [ ] Register with display name, email, password/confirmation, terms accepted, terms version, optional device name.
-- [ ] Login with generic invalid-credentials response for unknown email or wrong password.
-- [ ] Sanctum bearer token issuance, 60-day expiry policy, token metadata and revocation.
-- [ ] Logout current token or all tokens.
-- [ ] Refresh rotates current token and revokes old token.
-- [ ] Forgot password always returns the same 200 response regardless of account existence; queue email delivery.
-- [ ] Reset token expires after 60 minutes, single-use; successful reset revokes all tokens.
-- [ ] Change password verifies current password, requires new password to differ, revokes other tokens.
-- [ ] `GET /me`, `PATCH /me`, `GET /me/stats`.
-- [ ] Delete account only after password verification and remove all associated data/tokens.
-- [ ] Implement the password reset web page and Terms/Privacy pages/URLs.
+- [x] Register with display name, email, password/confirmation, terms accepted, terms version, optional device name. *(Evidence: `RegisterTest`.)*
+- [x] Login with generic invalid-credentials response for unknown email or wrong password. *(Evidence: `LoginTest::test_wrong_password_and_unknown_email_are_indistinguishable`; the unknown-email path also spends one hash so timing matches.)*
+- [x] Sanctum bearer token issuance, 60-day expiry policy, token metadata and revocation. *(Evidence: `TokenLifecycleTest`; per-token `expires_at`, ULID token ids, daily `sanctum:prune-expired`.)*
+- [x] Logout current token or all tokens. *(Evidence: `TokenLifecycleTest`.)*
+- [x] Refresh rotates current token and revokes old token. *(Evidence: `TokenLifecycleTest::test_refresh_rotates_the_token_and_revokes_the_old_one`.)*
+- [x] Forgot password always returns the same 200 response regardless of account existence; queue email delivery. *(Evidence: `PasswordResetTest`.)*
+- [x] Reset token expires after 60 minutes, single-use; successful reset revokes all tokens. *(Evidence: `PasswordResetTest`.)*
+- [x] Change password verifies current password, requires new password to differ, revokes other tokens. *(Evidence: `ProfileTest`.)*
+- [ ] `GET /me`, `PATCH /me`, `GET /me/stats`. *(`GET /me` and `PATCH /me` done: `ProfileTest`. `GET /me/stats` deferred: it counts links and collections, whose tables arrive in Phases 3-5.)*
+- [x] Delete account only after password verification and remove all associated data/tokens. *(Evidence: `ProfileTest`. Every later user-owned table must use `cascadeOnDelete()` and extend the deletion test.)*
+- [ ] Implement the password reset web page and Terms/Privacy pages/URLs. *(Reset page done: `PasswordResetTest`. Terms/Privacy pages BLOCKED on legal content: DEC-021. Their URLs are already configurable via `STASHLY_TERMS_URL` / `STASHLY_PRIVACY_URL`.)*
 - **Gate:** auth feature tests cover success, validation, rate limits, token expiry/rotation/revocation, enumeration resistance, and deletion.
 
 ### Phase 3 — URL normalization and link saving

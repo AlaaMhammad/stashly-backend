@@ -53,6 +53,9 @@ return [
         'export_per_ten_minutes' => 1,
     ],
 
+    // Sanctum bearer tokens are valid for 60 days; refresh issues a new 60-day token.
+    'token_ttl_days' => 60,
+
     // GET /config is cacheable for 5 minutes.
     'config_cache_seconds' => 300,
 

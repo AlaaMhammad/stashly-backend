@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\PasswordResetController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SystemController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,3 +16,32 @@ Route::get('/health', [SystemController::class, 'health'])
 
 // API-SYS-002
 Route::get('/config', [SystemController::class, 'config']);
+
+Route::prefix('auth')->group(function () {
+    // API-AUTH-001
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
+    // API-AUTH-002
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+    // API-AUTH-005
+    Route::post('/forgot-password', [PasswordResetController::class, 'forgot'])->middleware('throttle:forgot-password');
+    // API-AUTH-006
+    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        // API-AUTH-003
+        Route::post('/logout', [AuthController::class, 'logout']);
+        // API-AUTH-004
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+    });
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    // API-PROF-001
+    Route::get('/me', [ProfileController::class, 'show']);
+    // API-PROF-002
+    Route::patch('/me', [ProfileController::class, 'update']);
+    // API-PROF-005
+    Route::delete('/me', [ProfileController::class, 'destroy']);
+    // API-AUTH-007
+    Route::put('/me/password', [ProfileController::class, 'changePassword']);
+});
