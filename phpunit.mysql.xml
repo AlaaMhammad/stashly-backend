@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Explicit database integration run against the dedicated "stashly_test" database:
+
+      php artisan test with the option  configuration  set to phpunit.mysql.xml
+      (see Stashly_Backend_Docs/operations/database-readiness.md for the exact command)
+
+  The default suite (phpunit.xml) keeps using in-memory SQLite and is unaffected.
+
+  - DB_HOST, DB_PORT, DB_USERNAME and DB_PASSWORD are NOT set here: they come from the
+    environment of the shell that runs the tests (or a git-ignored .env.testing).
+    No credentials belong in this file.
+  - DB_DATABASE is forced to stashly_test and DB_URL is forced empty, so neither a shell
+    variable nor .env can point the run at another database.
+  - DB_CONNECTION defaults to "mariadb" (the local server is MariaDB 10.4). Set
+    DB_CONNECTION=mysql in the shell for a real MySQL run. Results from the two drivers are
+    different evidence and must be reported separately.
+  - tests/Support/TestDatabaseGuard refuses to run unless the effective database is
+    exactly stashly_test, before any migration or table drop.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="mariadb"/>
+        <env name="DB_DATABASE" value="stashly_test" force="true"/>
+        <env name="DB_URL" value="" force="true"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+    </php>
+</phpunit>

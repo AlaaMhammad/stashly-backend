@@ -14,12 +14,26 @@ use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\FakeDnsResolver;
 use Tests\Support\FakeTransport;
+use Tests\Support\TestDatabaseGuard;
 
 abstract class TestCase extends BaseTestCase
 {
     protected FakeDnsResolver $dns;
 
     protected FakeTransport $transport;
+
+    /**
+     * Runs before setUpTraits(), i.e. before RefreshDatabase can migrate or drop
+     * anything: the effective database must be in-memory SQLite or "stashly_test".
+     */
+    public function createApplication()
+    {
+        $app = parent::createApplication();
+
+        TestDatabaseGuard::assertApplicationIsSafe($app);
+
+        return $app;
+    }
 
     /**
      * No test may reach real DNS or the network, and queued jobs only run when

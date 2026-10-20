@@ -18,6 +18,53 @@
 | Security gates | `SsrfTest` (88), `CurlTransportTest` (real curl, 11), `HardeningTest`, `ObservabilityTest`, auth/enumeration/IDOR tests | pass; ~50 mutation checks across phases were all caught |
 | Live outbound lookup | one real HTTPS fetch; self-signed and expired certificates | works; both certificates rejected (manual, not automated) |
 
+## Update 2026-10-20 — readiness review (no code changed)
+
+Verified findings only; details in [`database-readiness.md`](database-readiness.md) and [`../api/android-contract-review.md`](../api/android-contract-review.md).
+
+- **Engine requirement derived from the code:** MySQL 8.0 or later (window function in `CollectionPresenter`); MySQL 5.7 is not supported. Production version still to be confirmed by the owner (DEC-015, DEC-033).
+- **Local MariaDB 10.4.32** is suitable for *preliminary* checks only (schema, FKs, indexes, queries, row locks); it is not release evidence. Collation, accent handling, lock behavior and plans must be re-run on the target MySQL.
+- **No database was connected to with credentials, no `.env` value was read, and no migration was run on MySQL/MariaDB** during this review.
+- **New finding:** ULIDs are emitted in lowercase (canonical text is uppercase) — DEC-032 for the Android owner.
+- **Android contract:** 5 endpoints compared against the reference using real captured responses; every difference is provisional and listed for confirmation.
+
+## Requirements still missing, by type
+
+### Content or decisions only you (or others outside the code) can supply
+| Item | What is needed | Blocks |
+|---|---|---|
+| Terms of Service text | Final legal text (or a hosted URL), its version identifier, and who maintains it | Terms page; `STASHLY_TERMS_URL`, `STASHLY_TERMS_VERSION` |
+| Privacy Policy text | Final legal text (or a hosted URL) | Privacy page; `STASHLY_PRIVACY_URL` |
+| Hosting choice for legal pages | Hosted by this backend (then a Blade page per document is an implementation task) or elsewhere (then only config values) — DEC-021 | Contract section 5 |
+| App versions | `STASHLY_MIN_SUPPORTED_APP_VERSION`, `STASHLY_LATEST_APP_VERSION` for the first release (DEC-010) | `/config` |
+| Production MySQL version | Exact version and managed or self-hosted (DEC-015, DEC-033) | all DB evidence |
+| Mail provider | SMTP host/port/credentials or provider, the From address and name, SPF/DKIM for the sending domain | reset e-mail delivery |
+| Public base URL | HTTPS API host (`APP_URL`), used in reset links | reset page, https forcing |
+| Android confirmations | Yes/no on X1–X5 and each "Decisions" line, ideally real payload fixtures | contract sign-off (DEC-002, DEC-008, DEC-017, DEC-028, DEC-029, DEC-030, DEC-032, DEC-034) |
+| Open product decisions | DEC-009 deletion strategy at scale, DEC-023 bcrypt vs Argon2id (needs production PHP version) | scale and password policy |
+
+### Implementation tasks (I can do them once the input exists or you approve)
+| Task | Depends on |
+|---|---|
+| `phpunit.mysql.xml` and a test-database-name guard | your approval (proposed in `database-readiness.md`) |
+| Run migrations, rollback and the full suite on a dedicated `stashly_test` database | the database exists and you approve the exact commands |
+| MySQL-specific fixes, if the run finds any | results of the run |
+| Terms and Privacy pages (Blade views + routes), if hosted here | legal text (DEC-021) |
+| Contract fixtures from real Android payloads and any shape changes | Android owner answers |
+| A real-SMTP smoke test of the reset e-mail | mail provider settings in a git-ignored environment |
+| Optional: CI workflow (suite + Pint + audit + MySQL job) | where CI will run |
+
+### Infrastructure / staging tasks (outside this repository)
+| Item | Needed |
+|---|---|
+| Staging host | PHP 8.2+ with curl (CA bundle), MySQL 8.x, HTTPS with a valid certificate, `APP_ENV=production`, `APP_DEBUG=false`, `TRUSTED_PROXIES` set |
+| Queue workers | Supervised `php artisan queue:work --queue=metadata` (isolated, outbound 80/443 only, no route to database admin, cache or cloud metadata address) and a separate worker for `default` (mail) |
+| Scheduler | Cron `* * * * * php artisan schedule:run` |
+| Mail | Real transport configured; queue worker running for mail |
+| Monitoring | Something that polls `GET /health` and reads the log for `Queue backlog`, `Queue job failed`, `Database query failed`, `BLOCKED_HOST` |
+| Database | Dedicated least-privilege app user (`SELECT, INSERT, UPDATE, DELETE`), separate migration user, backups and a tested restore |
+| Smoke tests | The list in `deployment-and-operations.md`, plus `php artisan stashly:preflight` |
+
 ## Not verified — blocks release
 
 1. **MySQL (DEC-015).** No credentials were provided; the local server is MariaDB 10.4. Never run against MySQL: migrations, the unique indexes (links URL hash, collection name key, tag name), binary-collation behavior for case-insensitive names and accents, `LIKE` search behavior, the 100-collection row lock, the window function used for collection covers, and idempotency/lock behavior under real concurrency. The plan requires this (`testing-strategy.md`).
@@ -41,6 +88,22 @@ DEC-002, DEC-008 (response shapes), DEC-003 (refresh-preview limit meaning), DEC
 - Account deletion is one transaction (DEC-009); very large accounts are untested.
 - Local PHP 8.2.12 is old and 8.2 is security-fixes-only until 31 Dec 2026; MariaDB 10.4 is end-of-life.
 - No CI configuration exists; the commands above are the manual equivalent.
+
+## Prioritized checklist and next safe action
+
+| # | Action | Who | Status |
+|---|---|---|---|
+| 1 | **Next safe action:** approve (or amend) the dedicated database `stashly_test` and the exact commands in `database-readiness.md` section 4; create the database and user yourself | you | waiting |
+| 2 | Approve adding `phpunit.mysql.xml` and the `_test` database-name guard | you | waiting |
+| 3 | Run migrate, rollback, migrate, then the full suite on `stashly_test` (MariaDB 10.4 = preliminary) | me, after 1–2 | blocked on 1–2 |
+| 4 | Confirm the production MySQL version; repeat step 3 on it | you, then me | blocked |
+| 5 | Answer the Android contract questions (`android-contract-review.md`); supply payload fixtures | you / Android owner | blocked |
+| 6 | Supply Terms/Privacy content or URLs and app versions | you | blocked |
+| 7 | Provide mail provider settings (kept out of the repository) | you | blocked |
+| 8 | Stand up staging: workers, scheduler, mail, monitoring; run smoke tests and `stashly:preflight` | you / ops, me for fixes | blocked |
+| 9 | Re-run this record; only then consider marking endpoints `DONE` | both | not started |
+
+Nothing in this checklist has been executed except items already listed under "Verified (evidence)".
 
 ## Steps to reach release approval
 
