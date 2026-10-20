@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Jobs\FetchLinkMetadata;
 use App\Models\Link;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -31,6 +32,35 @@ class LinkService
     public function classify(NormalizedUrl $url): string
     {
         return $this->classifier->fromHost($url->host);
+    }
+
+    /**
+     * One of the user's links. Another user's id is indistinguishable from an
+     * unknown one: both throw and render as 404 NOT_FOUND.
+     *
+     * @throws ModelNotFoundException
+     */
+    public function findOwned(User $user, string $id): Link
+    {
+        // ULIDs are case-insensitive; HasUlids stores them lowercase.
+        return $user->links()->findOrFail(strtolower($id));
+    }
+
+    /**
+     * API-LINK-009: mark metadata pending again and queue a new lookup.
+     */
+    public function refreshMetadata(Link $link): Link
+    {
+        DB::transaction(function () use ($link) {
+            $link->forceFill([
+                'metadata_status' => Link::STATUS_PENDING,
+                'metadata_error_code' => null,
+            ])->save();
+
+            FetchLinkMetadata::dispatch($link->id)->afterCommit();
+        });
+
+        return $link;
     }
 
     public function findDuplicate(User $user, NormalizedUrl $url): ?Link

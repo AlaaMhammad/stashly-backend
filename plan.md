@@ -102,16 +102,16 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - **Gate:** normalization test matrix and concurrent duplicate/idempotency tests pass.
 
 ### Phase 4 — Link library operations
-- [ ] Cursor-paginated `GET /links`, default 20/max 50, newest first.
-- [ ] Implement filters: q, favorite, content_type, source/domain, collection_id, tags, saved_within_days, sort.
-- [ ] Several tags use AND (link must have all); values within other same filter use OR; different filter categories combine with AND.
-- [ ] Search title, fetched title, description, note, and domain; case-insensitive and Arabic-aware (diacritic handling and alef normalization).
-- [ ] Detail endpoint includes metadata, collections, tags.
-- [ ] PATCH only permits title, note, is_favorite; null/empty clears title/note; reject read-only fields.
-- [ ] Delete link.
-- [ ] Replace link collections atomically; empty array means Unsorted.
-- [ ] Replace link tags; normalize tags per user; delete tags that have no linked links.
-- [ ] Refresh metadata endpoint, max once/minute/link.
+- [x] Cursor-paginated `GET /links`, default 20/max 50, newest first. *(Evidence: `ListLinksTest`; keyset on (created_at, id), signed cursor bound to user + filters.)*
+- [ ] Implement filters: q, favorite, content_type, source/domain, collection_id, tags, saved_within_days, sort. *(All except `collection_id` and `tags` done: `ListLinksTest`. Those two return 422 until Phase 5 creates collections and tags.)*
+- [ ] Several tags use AND (link must have all); values within other same filter use OR; different filter categories combine with AND. *(OR within a filter and AND across filters done: `ListLinksTest`. Tag AND lands with tags in Phase 5.)*
+- [x] Search title, fetched title, description, note, and domain; case-insensitive and Arabic-aware (diacritic handling and alef normalization). *(Evidence: `ListLinksTest` search tests, `Tests\Unit\SearchTextTest`.)*
+- [ ] Detail endpoint includes metadata, collections, tags. *(Endpoint done: `LinkItemTest`. `collections` and `tags` are always empty until Phase 5.)*
+- [x] PATCH only permits title, note, is_favorite; null/empty clears title/note; reject read-only fields. *(Evidence: `LinkItemTest`; every non-editable body field is rejected.)*
+- [x] Delete link. *(Evidence: `LinkItemTest::test_delete_removes_the_link_permanently`.)*
+- [ ] Replace link collections atomically; empty array means Unsorted. *(Moved to Phase 5: needs the collections table.)*
+- [ ] Replace link tags; normalize tags per user; delete tags that have no linked links. *(Moved to Phase 5: needs the tags table.)*
+- [x] Refresh metadata endpoint, max once/minute/link. *(Evidence: `LinkItemTest` refresh tests; also 5/min per user (DEC-003). The job it queues is a Phase 6 placeholder.)*
 - **Gate:** filtering combinations, ownership isolation, read-only field rejection, and cursor validity tests pass.
 
 ### Phase 5 — Collections, tags, home, filter options

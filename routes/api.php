@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\LinkController;
+use App\Http\Controllers\Api\V1\LinkMetadataController;
 use App\Http\Controllers\Api\V1\LinkPreviewController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\ProfileController;
@@ -51,4 +52,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/links/preview', LinkPreviewController::class)->middleware('throttle:link-preview');
     // API-LINK-002
     Route::post('/links', [LinkController::class, 'store'])->middleware('throttle:link-save');
+    // API-LINK-003
+    Route::get('/links', [LinkController::class, 'index']);
+    // API-LINK-004
+    Route::get('/links/{link}', [LinkController::class, 'show'])->whereUlid('link');
+    // API-LINK-005
+    Route::patch('/links/{link}', [LinkController::class, 'update'])->whereUlid('link');
+    // API-LINK-006
+    Route::delete('/links/{link}', [LinkController::class, 'destroy'])->whereUlid('link');
+    // API-LINK-009
+    Route::post('/links/{link}/metadata/refresh', [LinkMetadataController::class, 'refresh'])
+        ->whereUlid('link')
+        ->middleware('throttle:metadata-refresh');
 });

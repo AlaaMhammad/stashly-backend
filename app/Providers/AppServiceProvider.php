@@ -67,6 +67,13 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('export', fn (Request $request) => Limit::perMinutes(10, self::limit('export_per_ten_minutes'))
             ->by(self::userOrIpKey($request)));
+
+        RateLimiter::for('metadata-refresh', fn (Request $request) => [
+            Limit::perMinute(self::limit('metadata_refresh_per_link_per_minute'))
+                ->by(self::userOrIpKey($request).'|link:'.strtolower((string) $request->route('link'))),
+            Limit::perMinute(self::limit('metadata_refresh_per_minute'))
+                ->by(self::userOrIpKey($request)),
+        ]);
     }
 
     private static function limit(string $name): int

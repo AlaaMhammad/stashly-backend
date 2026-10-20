@@ -30,6 +30,11 @@ class ApiException extends RuntimeException implements ShouldntReport
         return new self(ApiError::INVALID_URL, 422, 'This URL cannot be saved.');
     }
 
+    public static function invalidCursor(): self
+    {
+        return new self(ApiError::INVALID_CURSOR, 422, 'The cursor is invalid or does not match these filters.');
+    }
+
     public function render(): JsonResponse
     {
         return ApiError::response($this->errorCode, $this->getMessage(), $this->status, $this->details);

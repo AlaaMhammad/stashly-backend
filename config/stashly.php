@@ -42,7 +42,8 @@ return [
         'page_size_max' => 50,
     ],
 
-    // Contract "Rate limits" row. "refresh-preview 5/min" is pending DEC-003.
+    // Contract "Rate limits" row and API-LINK-009 ("1/min per link"). "refresh-preview
+    // 5/min" is provisionally a per-user limit on metadata refresh (DEC-003).
     'rate_limits' => [
         'api_per_minute' => 120,
         'login_per_minute' => 5,
@@ -51,6 +52,8 @@ return [
         'link_preview_per_minute' => 20,
         'link_save_per_minute' => 60,
         'export_per_ten_minutes' => 1,
+        'metadata_refresh_per_link_per_minute' => 1,
+        'metadata_refresh_per_minute' => 5,
     ],
 
     // Sanctum bearer tokens are valid for 60 days; refresh issues a new 60-day token.
