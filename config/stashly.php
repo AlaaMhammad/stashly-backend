@@ -56,6 +56,13 @@ return [
     // Sanctum bearer tokens are valid for 60 days; refresh issues a new 60-day token.
     'token_ttl_days' => 60,
 
+    // POST /links Idempotency-Key: the first response is replayed for 24 hours.
+    // Concurrent requests with the same key wait up to lock_wait_seconds (DEC-005).
+    'idempotency' => [
+        'ttl_hours' => 24,
+        'lock_wait_seconds' => 5,
+    ],
+
     // GET /config is cacheable for 5 minutes.
     'config_cache_seconds' => 300,
 

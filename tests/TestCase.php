@@ -2,8 +2,10 @@
 
 namespace Tests;
 
+use App\Models\Link;
 use App\Models\User;
 use App\Services\Auth\TokenIssuer;
+use App\Services\Links\LinkService;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
@@ -26,6 +28,14 @@ abstract class TestCase extends BaseTestCase
     protected function tokenFor(User $user, string $device = 'test device'): string
     {
         return app(TokenIssuer::class)->issue($user, $device)->plainTextToken;
+    }
+
+    /**
+     * Save a link through the real service (normalization, ownership, job dispatch).
+     */
+    protected function saveLink(User $user, string $url, array $data = []): Link
+    {
+        return app(LinkService::class)->save($user, ['url' => $url] + $data)->link;
     }
 
     /**

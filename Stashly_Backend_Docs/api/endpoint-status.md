@@ -18,8 +18,8 @@ Update only after checking code and tests. Initial status is intentionally `NOT 
 | API-PROF-003 | GET /me/stats | NOT STARTED | — | Deferred: needs links/collections tables (Phases 3-5). |
 | API-PROF-004 | GET /me/export | NOT STARTED | — | |
 | API-PROF-005 | DELETE /me | IN PROGRESS | `php artisan test --filter=ProfileTest` | Implemented and tested on SQLite; MySQL run unverified (DEC-015). Later user-owned tables must cascade and extend the test. |
-| API-LINK-001 | POST /links/preview | NOT STARTED | — | |
-| API-LINK-002 | POST /links | NOT STARTED | — | |
+| API-LINK-001 | POST /links/preview | IN PROGRESS | `php artisan test --filter=LinkPreviewTest` | Normalization, duplicate check, 20/min limit done. `metadata` is `null` until the SSRF-safe fetcher (Phase 6), so the 4-second fetch is not implemented yet. |
+| API-LINK-002 | POST /links | IN PROGRESS | `php artisan test --filter="SaveLinkTest\|IdempotencyTest"` | Save, 409 duplicate, Idempotency-Key, 60/min limit done. Non-empty `collection_ids`/`tags` rejected until Phase 5 (DEC-024). Metadata job is a Phase 6 placeholder. MySQL unverified. |
 | API-LINK-003 | GET /links | NOT STARTED | — | |
 | API-LINK-004 | GET /links/{link} | NOT STARTED | — | |
 | API-LINK-005 | PATCH /links/{link} | NOT STARTED | — | |

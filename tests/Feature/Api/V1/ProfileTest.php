@@ -159,4 +159,24 @@ class ProfileTest extends TestCase
         $this->resetAuth();
         $this->withToken($bystanderToken)->getJson('/api/v1/me')->assertOk();
     }
+
+    public function test_delete_account_removes_links_and_idempotency_records_only_for_that_user(): void
+    {
+        $user = User::factory()->create();
+        $token = $this->tokenFor($user);
+        $this->saveLink($user, 'https://example.com/mine');
+        $this->withToken($token)
+            ->withHeader('Idempotency-Key', '5f0c6d1e-7b2a-4c3d-9e8f-0a1b2c3d4e5f')
+            ->postJson('/api/v1/links', ['url' => 'https://example.com/keyed'])
+            ->assertCreated();
+
+        $bystander = User::factory()->create();
+        $theirs = $this->saveLink($bystander, 'https://example.com/mine');
+
+        $this->withToken($token)->deleteJson('/api/v1/me', ['password' => 'password'])->assertNoContent();
+
+        $this->assertDatabaseMissing('links', ['user_id' => $user->id]);
+        $this->assertDatabaseMissing('idempotency_records', ['user_id' => $user->id]);
+        $this->assertModelExists($theirs);
+    }
 }

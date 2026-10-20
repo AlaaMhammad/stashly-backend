@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\LinkController;
+use App\Http\Controllers\Api\V1\LinkPreviewController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SystemController;
@@ -44,4 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/me', [ProfileController::class, 'destroy']);
     // API-AUTH-007
     Route::put('/me/password', [ProfileController::class, 'changePassword']);
+
+    // API-LINK-001
+    Route::post('/links/preview', LinkPreviewController::class)->middleware('throttle:link-preview');
+    // API-LINK-002
+    Route::post('/links', [LinkController::class, 'store'])->middleware('throttle:link-save');
 });

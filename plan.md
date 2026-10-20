@@ -89,16 +89,16 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - **Gate:** auth feature tests cover success, validation, rate limits, token expiry/rotation/revocation, enumeration resistance, and deletion.
 
 ### Phase 3 — URL normalization and link saving
-- [ ] Build one URL normalization service and reuse it in preview, save, duplicate detection, and metadata processing.
-- [ ] Trim spaces; add `https://` if scheme absent.
-- [ ] Accept only HTTP/HTTPS; reject javascript/file/data/intent and credentials in URL.
-- [ ] Enforce maximum URL length 2048.
-- [ ] Lowercase scheme/host; drop `www.` and `m.`; remove default ports, fragments, tracking parameters (`utm_*`, `fbclid`, `gclid`, similar), sort remaining query parameters, strip trailing slash.
-- [ ] Preserve the user's entered value as `original_url`.
-- [ ] Enforce unique normalized URL per user in application logic and with an appropriate database uniqueness strategy.
-- [ ] Implement preview endpoint with 4-second limit and preview rate limit.
-- [ ] Implement save endpoint; queue metadata work; use 24-hour idempotency key behavior.
-- [ ] Duplicate save returns 409 with `details.existing_link`.
+- [ ] Build one URL normalization service and reuse it in preview, save, duplicate detection, and metadata processing. *(`App\Services\Links\UrlNormalizer`, used by preview, save and duplicate detection. Reuse before metadata fetch lands in Phase 6.)*
+- [x] Trim spaces; add `https://` if scheme absent. *(Evidence: `Tests\Unit\Links\UrlNormalizerTest`.)*
+- [x] Accept only HTTP/HTTPS; reject javascript/file/data/intent and credentials in URL. *(Evidence: `UrlNormalizerTest`, `SaveLinkTest::test_invalid_urls_return_invalid_url_and_save_nothing`.)*
+- [x] Enforce maximum URL length 2048. *(Evidence: `UrlNormalizerTest` length tests; applies to the input and to the normalized form.)*
+- [x] Lowercase scheme/host; drop `www.` and `m.`; remove default ports, fragments, tracking parameters (`utm_*`, `fbclid`, `gclid`, similar), sort remaining query parameters, strip trailing slash. *(Evidence: `UrlNormalizerTest`. Tracking list provisional: DEC-004; other details: DEC-026.)*
+- [x] Preserve the user's entered value as `original_url`. *(Evidence: `SaveLinkTest::test_saves_immediately_with_pending_metadata_and_contract_shape`; stored trimmed.)*
+- [x] Enforce unique normalized URL per user in application logic and with an appropriate database uniqueness strategy. *(Evidence: unique index on `(user_id, normalized_url_hash)` (sha256; a 2048-char utf8mb4 column exceeds MySQL's index key limit); `SaveLinkTest::test_concurrent_duplicate_caught_by_the_database_returns_409`. SQLite only; MySQL unverified.)*
+- [ ] Implement preview endpoint with 4-second limit and preview rate limit. *(Endpoint and 20/min limit done: `LinkPreviewTest`. `metadata` is `null` and the 4-second fetch is pending the SSRF-safe fetcher in Phase 6.)*
+- [x] Implement save endpoint; queue metadata work; use 24-hour idempotency key behavior. *(Evidence: `SaveLinkTest`, `IdempotencyTest`. `FetchLinkMetadata` is dispatched after commit but is a placeholder until Phase 6. Idempotency rules provisional: DEC-005.)*
+- [x] Duplicate save returns 409 with `details.existing_link`. *(Evidence: `SaveLinkTest::test_duplicate_returns_409_with_existing_link_and_queues_nothing`.)*
 - **Gate:** normalization test matrix and concurrent duplicate/idempotency tests pass.
 
 ### Phase 4 — Link library operations

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Services\Links\UrlNormalizer;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -19,7 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(UrlNormalizer::class, fn () => new UrlNormalizer(
+            config('stashly.limits.url_max_length'),
+        ));
     }
 
     /**

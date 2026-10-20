@@ -10,8 +10,8 @@ Initial state is `NOT STARTED`. Update status only with implementation and test 
 | Forgot/reset/change password | IN PROGRESS | `PasswordResetTest`, `ProfileTest` pass (Phase 2). Open: real mail transport untested. |
 | Profile/stats | IN PROGRESS | `GET/PATCH /me` tested (`ProfileTest`). `GET /me/stats` deferred until links/collections exist. |
 | Account export/deletion | IN PROGRESS | Deletion tested (`ProfileTest`); export is Phase 7. |
-| URL normalization | NOT STARTED | |
-| Link preview/save/idempotency/duplicate handling | NOT STARTED | |
+| URL normalization | IN PROGRESS | `UrlNormalizer` with matrix in `Tests\Unit\Links\UrlNormalizerTest` (Phase 3). Open: DEC-004, DEC-026; reuse before fetch in Phase 6. |
+| Link preview/save/idempotency/duplicate handling | IN PROGRESS | `SaveLinkTest`, `IdempotencyTest`, `LinkPreviewTest` pass (Phase 3), including the simulated concurrent duplicate. Open: preview metadata (Phase 6), collections/tags on save (Phase 5, DEC-024), DEC-005. |
 | Link list/search/filter/cursor pagination | NOT STARTED | |
 | Link edit/delete/favorite | NOT STARTED | |
 | Collections and relationship updates | NOT STARTED | |

@@ -8,6 +8,7 @@ use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -52,6 +53,14 @@ class User extends Authenticatable
             'password' => 'hashed',
             'terms_accepted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return HasMany<Link, $this>
+     */
+    public function links(): HasMany
+    {
+        return $this->hasMany(Link::class);
     }
 
     public function sendPasswordResetNotification($token): void
