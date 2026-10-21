@@ -41,22 +41,71 @@ class ConfigTest extends TestCase
             ]]);
     }
 
-    public function test_unset_release_values_are_null_not_invented(): void
+    public function test_unset_app_versions_are_null_not_invented(): void
     {
-        config([
-            'stashly.app_versions.min_supported' => null,
-            'stashly.app_versions.latest' => null,
-            'stashly.terms.version' => null,
-            'stashly.terms.url' => null,
-            'stashly.privacy.url' => null,
-        ]);
+        config(['stashly.app_versions.min_supported' => null, 'stashly.app_versions.latest' => null]);
 
         $this->getJson('/api/v1/config')
             ->assertOk()
             ->assertJsonPath('data.min_supported_app_version', null)
-            ->assertJsonPath('data.latest_app_version', null)
-            ->assertJsonPath('data.terms', ['version' => null, 'url' => null])
-            ->assertJsonPath('data.privacy', ['url' => null]);
+            ->assertJsonPath('data.latest_app_version', null);
+    }
+
+    public function test_unset_legal_urls_fall_back_to_the_draft_pages_served_by_this_backend(): void
+    {
+        config(['stashly.terms.url' => null, 'stashly.privacy.url' => null, 'stashly.terms.version' => 'draft-1']);
+
+        $this->getJson('/api/v1/config')
+            ->assertOk()
+            ->assertJsonPath('data.terms', ['version' => 'draft-1', 'url' => url('/terms')])
+            ->assertJsonPath('data.privacy', ['url' => url('/privacy')]);
+    }
+
+    public function test_empty_legal_urls_count_as_unset(): void
+    {
+        // .env.example ships these variables empty.
+        config(['stashly.terms.url' => '', 'stashly.privacy.url' => '']);
+
+        $this->getJson('/api/v1/config')
+            ->assertJsonPath('data.terms.url', url('/terms'))
+            ->assertJsonPath('data.privacy.url', url('/privacy'));
+    }
+
+    public function test_environment_values_override_the_draft_defaults(): void
+    {
+        config([
+            'stashly.terms.version' => '2027-01-01',
+            'stashly.terms.url' => 'https://legal.example.test/tos',
+            'stashly.privacy.url' => 'https://legal.example.test/privacy',
+        ]);
+
+        $this->getJson('/api/v1/config')
+            ->assertJsonPath('data.terms', ['version' => '2027-01-01', 'url' => 'https://legal.example.test/tos'])
+            ->assertJsonPath('data.privacy', ['url' => 'https://legal.example.test/privacy']);
+    }
+
+    public function test_the_config_file_defaults_the_terms_version_to_draft_1_but_honours_the_environment(): void
+    {
+        $original = $_SERVER['STASHLY_TERMS_VERSION'] ?? $_ENV['STASHLY_TERMS_VERSION'] ?? getenv('STASHLY_TERMS_VERSION');
+        $load = function (?string $value): array {
+            if ($value === null) {
+                unset($_SERVER['STASHLY_TERMS_VERSION'], $_ENV['STASHLY_TERMS_VERSION']);
+                putenv('STASHLY_TERMS_VERSION');
+            } else {
+                $_SERVER['STASHLY_TERMS_VERSION'] = $_ENV['STASHLY_TERMS_VERSION'] = $value;
+                putenv("STASHLY_TERMS_VERSION=$value");
+            }
+
+            return require config_path('stashly.php');
+        };
+
+        try {
+            $this->assertSame('draft-1', $load(null)['terms']['version'], 'unset');
+            $this->assertSame('draft-1', $load('')['terms']['version'], 'empty, as shipped in .env.example');
+            $this->assertSame('2027-01-01', $load('2027-01-01')['terms']['version'], 'explicit override');
+        } finally {
+            $load($original === false ? null : $original);
+        }
     }
 
     public function test_is_public_and_cacheable_for_five_minutes(): void

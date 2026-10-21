@@ -20,13 +20,16 @@ return [
         'latest' => env('STASHLY_LATEST_APP_VERSION'),
     ],
 
+    // DEC-021: until final legal copy exists, the backend serves draft pages at /terms and
+    // /privacy. Empty environment values count as "not set" (.env.example ships them empty),
+    // so the draft version applies; the URLs fall back to those routes in SystemController.
     'terms' => [
-        'version' => env('STASHLY_TERMS_VERSION'),
-        'url' => env('STASHLY_TERMS_URL'),
+        'version' => env('STASHLY_TERMS_VERSION') ?: 'draft-1',
+        'url' => env('STASHLY_TERMS_URL') ?: null,
     ],
 
     'privacy' => [
-        'url' => env('STASHLY_PRIVACY_URL'),
+        'url' => env('STASHLY_PRIVACY_URL') ?: null,
     ],
 
     // Contract "Limits" row. Key names are provisional until DEC-008 is resolved.

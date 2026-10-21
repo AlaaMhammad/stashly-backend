@@ -13,10 +13,10 @@ Build a secure, maintainable REST API for the Stashly Android application that i
 ## 2. Sources of truth
 
 1. **Primary contract:** `Stashly_API_Reference.docx` (Stashly API v1.0).
-2. **Project-specific implementation decisions:** `docs/decisions/`.
+2. **Project-specific implementation decisions:** `Stashly_Backend_Docs/decisions/`.
 3. **This plan:** delivery sequence and acceptance gates.
 
-Do not silently resolve contradictions or fill gaps with guessed product behavior. Log ambiguities and decisions in `docs/decisions/open-questions.md`.
+Do not silently resolve contradictions or fill gaps with guessed product behavior. Log ambiguities and decisions in `Stashly_Backend_Docs/decisions/open-questions.md`.
 
 ## 3. Non-negotiable contract
 
@@ -61,7 +61,7 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [x] Record current state and existing conventions before editing. *(Evidence: `operations/project-audit.md` §1.)*
 - [x] Run baseline tests and capture failures separately from new failures. *(Evidence: `php artisan test` → 5 passed, 0 failures; `operations/project-audit.md` §6.)*
 - [ ] Confirm database engine/version and queue/cache drivers in each environment.
-- [ ] Create/update `docs/` from this documentation set.
+- [ ] Create/update `Stashly_Backend_Docs/` from this documentation set.
 - **Gate:** a written repository audit exists; no duplicate implementation is started blindly.
 
 ### Phase 1 — Foundation and shared API behavior
@@ -85,7 +85,7 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [x] Change password verifies current password, requires new password to differ, revokes other tokens. *(Evidence: `ProfileTest`.)*
 - [x] `GET /me`, `PATCH /me`, `GET /me/stats`. *(Evidence: `ProfileTest`; `/me/stats` added in Phase 5: `OverviewEndpointsTest::test_me_stats`.)*
 - [x] Delete account only after password verification and remove all associated data/tokens. *(Evidence: `ProfileTest`. Every later user-owned table must use `cascadeOnDelete()` and extend the deletion test.)*
-- [ ] Implement the password reset web page and Terms/Privacy pages/URLs. *(Reset page done: `PasswordResetTest`. Terms/Privacy pages BLOCKED on legal content: DEC-021. Their URLs are already configurable via `STASHLY_TERMS_URL` / `STASHLY_PRIVACY_URL`.)*
+- [x] Implement the password reset web page and Terms/Privacy pages/URLs. *(Reset page: `PasswordResetTest`. Terms/Privacy: **draft** pages `GET /terms` and `GET /privacy` (version `draft-1`, visible draft banner), `/config` defaults to them and honors the `STASHLY_*` overrides: `LegalPagesTest`, `ConfigTest`. Final legal copy still has to replace the drafts before launch: DEC-021.)*
 - **Gate:** auth feature tests cover success, validation, rate limits, token expiry/rotation/revocation, enumeration resistance, and deletion.
 
 ### Phase 3 — URL normalization and link saving
@@ -159,7 +159,7 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 
 ## 6. Global acceptance criteria
 
-- All endpoints in `docs/api/endpoints.md` implemented or explicitly blocked by a recorded decision.
+- All endpoints in `Stashly_Backend_Docs/api/endpoints.md` implemented or explicitly blocked by a recorded decision.
 - API contract shapes and error codes match the source reference.
 - Every user-owned query is scoped by authenticated user.
 - Cross-user IDs return 404 without leaking existence.
@@ -185,4 +185,4 @@ A feature is `DONE` only when:
 
 ## 8. Progress tracking
 
-Track endpoint-level status in `docs/api/endpoint-status.md`, feature status in `docs/features/feature-status.md`, and unresolved decisions in `docs/decisions/open-questions.md`. Do not mark a checkbox complete without evidence (test name, command, or reviewed implementation path).
+Track endpoint-level status in `Stashly_Backend_Docs/api/endpoint-status.md`, feature status in `Stashly_Backend_Docs/features/feature-status.md`, and unresolved decisions in `Stashly_Backend_Docs/decisions/open-questions.md`. Do not mark a checkbox complete without evidence (test name, command, or reviewed implementation path).

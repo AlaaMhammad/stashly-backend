@@ -54,10 +54,11 @@ class SystemController extends Controller
             'latest_app_version' => $config['app_versions']['latest'],
             'terms' => [
                 'version' => $config['terms']['version'],
-                'url' => $config['terms']['url'],
+                // Environment values win; otherwise the draft pages served by this backend (DEC-021).
+                'url' => filled($config['terms']['url']) ? $config['terms']['url'] : route('terms'),
             ],
             'privacy' => [
-                'url' => $config['privacy']['url'],
+                'url' => filled($config['privacy']['url']) ? $config['privacy']['url'] : route('privacy'),
             ],
             'limits' => $config['limits'],
         ], 200, [

@@ -76,13 +76,15 @@ Verified findings only; details in [`database-readiness.md`](database-readiness.
 7. **Android client compatibility.** Checked against the written API reference only. No Android models or real payload fixtures exist (DEC-002, DEC-008); response shapes for `/config`, `/home`, `/search/filters`, `/health`, preview and export are provisional.
 8. **Automated TLS-verification test** (needs a TLS server); checked manually only.
 
-## Open decisions that affect the client contract
+## Decision status (updated 2026-10-20)
 
-DEC-002, DEC-008 (response shapes), DEC-003 (refresh-preview limit meaning), DEC-005, DEC-007, DEC-013, DEC-017, DEC-018, DEC-019, DEC-025, DEC-027, DEC-028, DEC-029, DEC-030, DEC-031 are accepted or implemented **provisionally**; DEC-009 (deletion strategy for very large accounts), DEC-010 (release config), DEC-021 (Terms/Privacy page content — pages not built), DEC-023 (bcrypt vs Argon2id) remain open. See `decisions/open-questions.md`.
+All 11 previously open decisions are **closed** (DEC-001, 002, 008, 009, 010, 014, 015, 021, 032, 033, 034). The internal provisional decisions are **final** (DEC-003, 004, 005, 007, 011, 016, 019, 020, 022, 026, 031). The Android-facing decisions are an **approved v1 baseline pending final confirmation by the Android client owner** (DEC-013, 017, 018, 025, 027, 028, 029, 030); DEC-002, 008, 032 and 034 are closed but still recommended for Android confirmation. DEC-023: bcrypt kept. Production target engine: **MySQL 8.4 LTS**. See `decisions/open-questions.md`.
+
+Approving decisions does not by itself allow `DONE`: the MySQL run, staging, real mail, worker/scheduler and Android confirmations below are still required.
 
 ## Known gaps and limits
 
-- **Terms and Privacy pages are not built** (DEC-021, needs legal text). `GET /config` serves whatever URLs are configured. This is a contract requirement ("Also Needed").
+- **Terms and Privacy pages are drafts** (DEC-021): `GET /terms` and `GET /privacy` serve placeholder text (version `draft-1`, visible banner, unfilled `[BRACKETS]`). Final legal copy and values for `STASHLY_TERMS_*` / `STASHLY_PRIVACY_URL` must replace them before launch; `stashly:preflight` warns while the draft is active.
 - DNS lookup time is not bounded by the 8 s / 4 s limits (DEC-030).
 - Search is a substring scan over the user's own links; large libraries may need a FULLTEXT index.
 - Account deletion is one transaction (DEC-009); very large accounts are untested.
@@ -98,7 +100,7 @@ DEC-002, DEC-008 (response shapes), DEC-003 (refresh-preview limit meaning), DEC
 | 3 | Run migrate, rollback, migrate, then the full suite on `stashly_test` (MariaDB 10.4 = preliminary) | me, after 1–2 | blocked on 1–2 |
 | 4 | Confirm the production MySQL version; repeat step 3 on it | you, then me | blocked |
 | 5 | Answer the Android contract questions (`android-contract-review.md`); supply payload fixtures | you / Android owner | blocked |
-| 6 | Supply Terms/Privacy content or URLs and app versions | you | blocked |
+| 6 | Supply final Terms/Privacy copy (or URLs) and app versions; draft pages exist meanwhile | you | blocked for launch (drafts in place) |
 | 7 | Provide mail provider settings (kept out of the repository) | you | blocked |
 | 8 | Stand up staging: workers, scheduler, mail, monitoring; run smoke tests and `stashly:preflight` | you / ops, me for fixes | blocked |
 | 9 | Re-run this record; only then consider marking endpoints `DONE` | both | not started |

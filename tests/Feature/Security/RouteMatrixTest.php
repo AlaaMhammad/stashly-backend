@@ -105,8 +105,8 @@ class RouteMatrixTest extends TestCase
     {
         $routes = collect(RouteFacade::getRoutes())->map(fn ($r) => $r->uri())->reject(fn ($u) => str_starts_with($u, 'api/v1/'));
 
-        // Web routes outside the contract (DEC-016): welcome page, framework health probe and the
-        // reset-password page. The csrf-cookie and local-storage routes are disabled.
-        $this->assertEqualsCanonicalizing(['/', 'up', 'reset-password'], $routes->values()->all());
+        // Web routes outside the contract: welcome page, framework health probe, the reset-password
+        // page and the draft legal pages (DEC-021). The csrf-cookie and local-storage routes are disabled (DEC-016).
+        $this->assertEqualsCanonicalizing(['/', 'up', 'reset-password', 'terms', 'privacy'], $routes->values()->all());
     }
 }

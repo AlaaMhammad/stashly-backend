@@ -3,7 +3,7 @@
 Use these rules for Copilot, Claude, ChatGPT, or any coding agent working in this repository.
 
 ## Before editing
-1. Read root `README.md`, `plan.md`, and the relevant docs under `docs/`.
+1. Read root `README.md`, `plan.md`, and the relevant docs under `Stashly_Backend_Docs/`.
 2. Inspect current routes, models, migrations, controllers, middleware, tests, package versions, and git status.
 3. Search for existing implementations before creating new ones.
 4. State the files expected to change and the tests that will prove the change.
@@ -29,4 +29,4 @@ Use these rules for Copilot, Claude, ChatGPT, or any coding agent working in thi
 6. List unresolved ambiguities and avoid claiming completion if any acceptance gate remains open.
 
 ## If blocked
-Stop and document the missing information in `docs/decisions/open-questions.md`. Ask for clarification when the decision changes contract, security, data model, or user-visible behavior.
+Stop and document the missing information in `Stashly_Backend_Docs/decisions/open-questions.md`. Ask for clarification when the decision changes contract, security, data model, or user-visible behavior.
