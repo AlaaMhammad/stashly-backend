@@ -17,6 +17,15 @@
 - Token expiry is 60 days; refresh rotates and revokes old token.
 - Consider token storage and expiry behavior carefully: verify Sanctum token model/schema supports required expiration semantics; do not assume global Sanctum defaults automatically implement per-token 60-day expiry.
 
+## Google Sign-In (DEC-035)
+- The ID token is verified locally: RS256 only (never `none`/HS256), signature against Google's key set, `iss`, `aud` = `GOOGLE_CLIENT_ID`, strict `exp`, `email_verified` must be boolean true. Nothing from the token is trusted before the signature verifies.
+- An unverified Google e-mail never creates or links an account. An e-mail already linked to another Google id is never taken over.
+- Linking to an existing password account revokes that account's earlier sessions and clears its password (DEC-037), so a pre-registered attacker keeps no way in. E-mail verification at registration is still absent.
+- `DELETE /me` for an account without a password requires a fresh Google `id_token` of the linked Google account (DEC-036); a stolen bearer token alone cannot delete such an account.
+- The raw `id_token`, its claims and the e-mail are never logged or echoed; failures log a reason code only.
+- Google-only accounts have no password; password login treats them exactly like unknown e-mails (same 401, same hashing time).
+- Google's key endpoint is a fixed host (not user-supplied), fetched with short timeouts; an unknown `kid` refetches at most once a minute.
+
 ## SSRF
 Follow `security/ssrf.md` as a mandatory implementation checklist. Remote metadata extraction is a high-risk boundary.
 

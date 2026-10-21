@@ -36,7 +36,7 @@ class RegisterTest extends TestCase
         $response = $this->postJson('/api/v1/auth/register', $this->payload())
             ->assertCreated()
             ->assertExactJsonStructure(['data' => [
-                'user' => ['id', 'display_name', 'email', 'created_at'],
+                'user' => ['id', 'display_name', 'email', 'created_at', 'password_set'],
                 'token' => ['access_token', 'token_type', 'expires_at'],
             ]])
             ->assertJsonPath('data.user.display_name', 'Lina')
@@ -152,7 +152,7 @@ class RegisterTest extends TestCase
         $content = $this->postJson('/api/v1/auth/register', $this->payload())->getContent();
 
         $this->assertStringNotContainsString('correct-horse', $content);
-        $this->assertStringNotContainsString('password', $content);
+        $this->assertStringNotContainsString('password', str_replace('password_set', '', $content));
         $this->assertStringNotContainsString('remember_token', $content);
     }
 

@@ -6,7 +6,7 @@
 - Version/date: 1.0, 19 October 2026
 - Base URL: `https://{host}/api/v1`
 - Stack assumed by source: Laravel REST API, Sanctum bearer tokens, MySQL, queued jobs
-- Document states: 32 endpoints.
+- Document states: 32 endpoints. (DEC-035 later added `POST /auth/google`; the implemented API has 33 operations.)
 - JSON UTF-8, snake_case, `Accept: application/json`.
 - IDs are ULIDs; timestamps are ISO 8601 UTC.
 - Tags are identified by name.

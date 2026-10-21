@@ -65,6 +65,14 @@ Verified findings only; details in [`database-readiness.md`](database-readiness.
 | Database | Dedicated least-privilege app user (`SELECT, INSERT, UPDATE, DELETE`), separate migration user, backups and a tested restore |
 | Smoke tests | The list in `deployment-and-operations.md`, plus `php artisan stashly:preflight` |
 
+## Update 2026-10-21 - Phase 9 (Google Sign-In, DEC-035)
+
+- The API now has **33 operations**: the reference's 32 plus the owner-requested `POST /auth/google`. `RouteMatrixTest` pins all 33 with their authentication and limiters; the Postman collection covers all 33.
+- Verified: `GoogleAuthTest` (41) and `GoogleIdTokenVerifierTest` (53) with real RSA-signed tokens and a faked Google key endpoint; 18 mutation checks on the security logic were all caught; the migration was checked forward and backward on SQLite. SQLite suite: 756 passed.
+- **Not verified:** the endpoint has **never seen a real Google ID token or Google's real key endpoint** (tests fake Google); that needs the real `GOOGLE_CLIENT_ID` and a device. The migration's `password` change on MySQL/MariaDB is untested. The Postman request was executed only against a mock (skipped by default without `google_id_token`).
+- **Decisions DEC-036 and DEC-037 implemented** (Approved v1 baseline - pending Android confirmation): a Google-only user deletes the account with a fresh Google `id_token` (the user object now carries `password_set`), and linking Google to an existing account clears its password and revokes its sessions. Android must handle the `id_token` delete body.
+- The verdict is unchanged: **not approved for release**.
+
 ## Not verified — blocks release
 
 1. **MySQL (DEC-015).** No credentials were provided; the local server is MariaDB 10.4. Never run against MySQL: migrations, the unique indexes (links URL hash, collection name key, tag name), binary-collation behavior for case-insensitive names and accents, `LIKE` search behavior, the 100-collection row lock, the window function used for collection covers, and idempotency/lock behavior under real concurrency. The plan requires this (`testing-strategy.md`).

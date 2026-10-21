@@ -9,6 +9,8 @@ use App\Http\Requests\Api\V1\UpdateProfileRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\Accounts\AccountDeletionService;
 use App\Services\Accounts\DataExportService;
+use App\Services\Auth\GoogleIdTokenVerifier;
+use App\Services\Auth\GoogleTokenException;
 use App\Support\Api\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,10 +91,26 @@ class ProfileController extends Controller
 
     /**
      * API-PROF-005: permanent deletion after a password check. 204.
+     * DEC-036: an account without a password proves itself with a fresh Google id_token
+     * that belongs to the Google account linked to it.
      */
-    public function destroy(DeleteAccountRequest $request, AccountDeletionService $deletion): Response
+    public function destroy(DeleteAccountRequest $request, AccountDeletionService $deletion, GoogleIdTokenVerifier $google): Response
     {
-        $deletion->delete($request->user());
+        $user = $request->user();
+
+        if ($user->password === null) {
+            try {
+                $identity = $google->verify($request->validated('id_token'));
+            } catch (GoogleTokenException $e) {
+                throw $e->toApiException();
+            }
+
+            if ($user->google_id === null || ! hash_equals($user->google_id, $identity->subject)) {
+                throw (new GoogleTokenException(GoogleTokenException::CLAIMS))->toApiException();
+            }
+        }
+
+        $deletion->delete($user);
 
         return response()->noContent();
     }

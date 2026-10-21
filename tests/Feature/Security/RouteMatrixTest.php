@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route as RouteFacade;
 use Tests\TestCase;
 
 /**
- * Release gate: the 32 contract operations exist exactly once, each with the
+ * Release gate: the 33 contract operations (32 + POST /auth/google) exist exactly once, each with the
  * contract's authentication and rate limiter (API reference 1.1 and 2.x).
  */
 class RouteMatrixTest extends TestCase
@@ -16,13 +16,14 @@ class RouteMatrixTest extends TestCase
     /** Operations that need no bearer token. */
     private const PUBLIC = [
         'GET api/v1/health', 'GET api/v1/config', 'POST api/v1/auth/register', 'POST api/v1/auth/login',
-        'POST api/v1/auth/forgot-password', 'POST api/v1/auth/reset-password',
+        'POST api/v1/auth/forgot-password', 'POST api/v1/auth/reset-password', 'POST api/v1/auth/google',
     ];
 
     /** Limiters beyond the default 120/min/user "api" limiter. */
     private const EXTRA_LIMITERS = [
         'POST api/v1/auth/register' => ['register'],
         'POST api/v1/auth/login' => ['login'],
+        'POST api/v1/auth/google' => ['google-auth'],
         'POST api/v1/auth/forgot-password' => ['forgot-password'],
         'POST api/v1/links/preview' => ['link-preview'],
         'POST api/v1/links' => ['link-save'],
@@ -32,7 +33,7 @@ class RouteMatrixTest extends TestCase
 
     private const OPERATIONS = [
         'GET api/v1/health', 'GET api/v1/config',
-        'POST api/v1/auth/register', 'POST api/v1/auth/login', 'POST api/v1/auth/logout', 'POST api/v1/auth/refresh',
+        'POST api/v1/auth/register', 'POST api/v1/auth/login', 'POST api/v1/auth/google', 'POST api/v1/auth/logout', 'POST api/v1/auth/refresh',
         'POST api/v1/auth/forgot-password', 'POST api/v1/auth/reset-password', 'PUT api/v1/me/password',
         'GET api/v1/me', 'PATCH api/v1/me', 'GET api/v1/me/stats', 'GET api/v1/me/export', 'DELETE api/v1/me',
         'POST api/v1/links/preview', 'POST api/v1/links', 'GET api/v1/links', 'GET api/v1/links/{link}',
@@ -68,9 +69,10 @@ class RouteMatrixTest extends TestCase
         return app('router')->resolveMiddleware($route->gatherMiddleware(), $route->excludedMiddleware());
     }
 
-    public function test_exactly_the_32_contract_operations_are_routed(): void
+    public function test_exactly_the_33_contract_operations_are_routed(): void
     {
-        $this->assertCount(32, self::OPERATIONS);
+        // The reference's 32 operations plus POST /auth/google (DEC-035).
+        $this->assertCount(33, self::OPERATIONS);
         $this->assertEqualsCanonicalizing(self::OPERATIONS, array_keys($this->apiRoutes()));
     }
 
@@ -96,7 +98,7 @@ class RouteMatrixTest extends TestCase
 
     public function test_the_named_limiters_exist_with_the_contract_numbers(): void
     {
-        foreach (['api', 'login', 'register', 'forgot-password', 'link-preview', 'link-save', 'export', 'metadata-refresh'] as $name) {
+        foreach (['api', 'login', 'register', 'forgot-password', 'link-preview', 'link-save', 'export', 'metadata-refresh', 'google-auth'] as $name) {
             $this->assertNotNull(app(RateLimiter::class)->limiter($name), "limiter $name");
         }
     }

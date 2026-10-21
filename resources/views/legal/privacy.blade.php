@@ -10,7 +10,7 @@
     <p>[COMPANY / OWNER NAME], contact [E-MAIL].</p>
 
     <h2>What we collect</h2>
-    <p><strong>Account:</strong> display name, e-mail, a hashed password (never the password itself), the terms version you accepted and when.</p>
+    <p><strong>Account:</strong> display name, e-mail, a hashed password (never the password itself), the terms version you accepted and when. If you sign in with Google: your Google account identifier and profile picture address (we never receive your Google password).</p>
     <p><strong>Content you create:</strong> saved links, your titles and notes, tags, collections, favourites.</p>
     <p><strong>Page details we fetch:</strong> title, description, site name and icon/preview-image addresses of pages you save.</p>
     <p><strong>Devices and sessions:</strong> the device name you give at sign-in and sign-in tokens.</p>

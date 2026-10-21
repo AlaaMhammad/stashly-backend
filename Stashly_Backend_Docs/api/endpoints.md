@@ -9,7 +9,7 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-SYS-001 | `GET /health` | Public | Database/cache/queue checks; 200 healthy, 503 on check failure |
 | API-SYS-002 | `GET /config` | Public | API/app versions, Terms/Privacy URLs, limits; cache 5 min |
 
-## Authentication (7)
+## Authentication (8)
 
 | ID | Method + path | Auth | Key behavior |
 |---|---|---|---|
@@ -20,6 +20,7 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-AUTH-005 | `POST /auth/forgot-password` | Public | Always 200; queued reset email |
 | API-AUTH-006 | `POST /auth/reset-password` | Public | 60-minute single-use token; revoke all tokens |
 | API-AUTH-007 | `PUT /me/password` | Bearer | Verify current password; revoke other tokens |
+| API-AUTH-008 | `POST /auth/google` | Public | Google ID token sign-in, link or sign-up; 200 or 201 (DEC-035, owner-requested extension) |
 
 ## Profile/account (5)
 
@@ -29,7 +30,7 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-PROF-002 | `PATCH /me` | Bearer | Update display name, 1–100 |
 | API-PROF-003 | `GET /me/stats` | Bearer | Link, collection, favorite counts |
 | API-PROF-004 | `GET /me/export` | Bearer | JSON attachment; 1 per 10 min |
-| API-PROF-005 | `DELETE /me` | Bearer | Password check, permanent data/token deletion; 204 |
+| API-PROF-005 | `DELETE /me` | Bearer | Password check (or, for an account without a password, a fresh Google `id_token`, DEC-036), permanent data/token deletion; 204 |
 
 ## Saved links (9)
 
@@ -73,5 +74,7 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 - Check the source reference for each endpoint's exact request fields/status code before implementation.
 
 ## Source caveat
+
+**DEC-035:** `POST /auth/google` (API-AUTH-008) was added at the owner's request after the reference was written, so the implemented API has **33** operations. `Stashly_API_Reference.docx` has not been changed.
 
 The reference says 32 endpoints, while counting the listed operations above may produce a different count depending on whether the contract counts individual operations or groups. Preserve every listed operation and track the count discrepancy in `decisions/open-questions.md` rather than omitting an operation.

@@ -55,6 +55,8 @@ return [
         'link_preview_per_minute' => 20,
         'link_save_per_minute' => 60,
         'export_per_ten_minutes' => 1,
+        // POST /auth/google (DEC-035): the e-mail is unknown before the token is verified, so per IP.
+        'google_auth_per_minute' => 10,
         'metadata_refresh_per_link_per_minute' => 1,
         'metadata_refresh_per_minute' => 5,
     ],

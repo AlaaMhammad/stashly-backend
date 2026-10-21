@@ -157,6 +157,18 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [x] Update endpoint matrix and status files with test evidence. *(Done; no endpoint is DONE pending the gate below.)*
 - **Gate:** release approved only when every required endpoint has acceptance evidence.
 
+### Phase 9 - Google Sign-In (owner-requested extension, DEC-035)
+- [x] `POST /api/v1/auth/google` (`id_token`, `device_name`, `terms_accepted`, `terms_version`): 200 existing/linked, 201 new, same `{user, token}` shape as login. *(Evidence: `GoogleAuthTest`.)*
+- [x] Local verification of the Google ID token (RS256 signature against Google's key set, `iss`, `aud`, `exp`, `email_verified`) in a mockable `GoogleIdTokenVerifier`; tokens never logged. *(Evidence: `GoogleIdTokenVerifierTest`, `GoogleAuthTest::test_logs_never_contain_the_token_the_email_or_google_ids`.)*
+- [x] Account rules: link only on a Google-verified e-mail, never take over an account linked to another Google id, terms required for a new account. *(Evidence: `GoogleAuthTest`.)*
+- [x] Migration: `users.google_id` (unique, nullable), `avatar_url`, nullable `password`; password login on passwordless accounts is a normal 401. *(Evidence: forward/backward check on SQLite, `GoogleAuthTest`.)*
+- [x] Rate limit `google-auth` (10/min per IP), `auth.google_enabled` in `GET /config`, `GOOGLE_CLIENT_ID` placeholder, preflight warning. *(Evidence: `GoogleAuthTest`, `ConfigTest`, `PreflightTest`, `RouteMatrixTest`.)*
+- [x] Postman collection and environment updated. *(Evidence: static audit, newman full run 0 failures, mock run of the new request.)*
+- [ ] Exercise with a real Google ID token and the real key endpoint. *(UNVERIFIED: needs the real client id and a device.)*
+- [x] DEC-036 (Google-only account deletion via fresh `id_token`, `password_set` on the user object) and DEC-037 (linking clears the password) implemented and tested; both pending Android confirmation.
+- [ ] Open: password change for Google-only users stays via forgot-password; e-mail verification at registration; sign-in provider in the export.
+- **Gate:** Android owner confirms the contract; a real-token smoke test passes.
+
 ## 6. Global acceptance criteria
 
 - All endpoints in `Stashly_Backend_Docs/api/endpoints.md` implemented or explicitly blocked by a recorded decision.

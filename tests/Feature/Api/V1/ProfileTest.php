@@ -30,6 +30,7 @@ class ProfileTest extends TestCase
                 'display_name' => 'Lina',
                 'email' => 'lina@example.test',
                 'created_at' => '2026-10-16T09:30:12Z',
+                'password_set' => true,
             ]]]);
     }
 

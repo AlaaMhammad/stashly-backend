@@ -72,6 +72,19 @@ class PreflightTest extends TestCase
         }
     }
 
+    public function test_a_missing_google_client_id_is_a_warning_not_a_failure(): void
+    {
+        $this->productionConfig();
+        config(['services.google.client_id' => null]);
+        [, $output] = $this->run_();
+        $this->assertMatchesRegularExpression('/WARN\s+\|?\s*Google sign-in client id/', $output);
+
+        config(['services.google.client_id' => 'secret-looking-client-id.apps.googleusercontent.com']);
+        [, $output] = $this->run_();
+        $this->assertMatchesRegularExpression('/OK\s+\|?\s*Google sign-in client id/', $output);
+        $this->assertStringNotContainsString('secret-looking-client-id', $output);
+    }
+
     public function test_warnings_do_not_fail_the_check_and_secrets_are_never_printed(): void
     {
         $this->productionConfig();

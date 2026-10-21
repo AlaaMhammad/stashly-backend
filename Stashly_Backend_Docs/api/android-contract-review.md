@@ -17,8 +17,9 @@
 ## 1. `GET /config` (public)
 
 - **Documented:** `200 {api_version, min_supported_app_version, latest_app_version, terms{version,url}, privacy{url}, limits{...}}`. Cacheable 5 minutes.
-- **Actual** (`data`): `api_version: string ("1.0")`, `min_supported_app_version: string|null`, `latest_app_version: string|null`, `terms: {version: string|null, url: string|null}`, `privacy: {url: string|null}`, `limits: {url_max_length, title_max_length, note_max_length, collection_name_max_length, collection_description_max_length, tag_max_length, tags_per_link_max, collections_per_user_max, page_size_max}` (all integers: 2048, 300, 2000, 60, 300, 40, 20, 100, 50).
+- **Actual** (`data`): `api_version: string ("1.0")`, `min_supported_app_version: string|null`, `latest_app_version: string|null`, `terms: {version: string (default "draft-1"), url: string}`, `privacy: {url: string}` (the URLs default to the draft pages `/terms` and `/privacy` served by the backend, DEC-021; environment variables override), `auth: {google_enabled: boolean}` (new, additive, DEC-035), `limits: {url_max_length, title_max_length, note_max_length, collection_name_max_length, collection_description_max_length, tag_max_length, tags_per_link_max, collections_per_user_max, page_size_max}` (all integers: 2048, 300, 2000, 60, 300, 40, 20, 100, 50).
 - **Provisional / undocumented:** all nine `limits` key names (DEC-008). `api_version` value. The five release fields are `null` until the environment sets them (DEC-010).
+- **DEC-036/037 (Android must handle):** the shared user object now has `password_set` (boolean). `DELETE /me` sends `{password}` when `password_set` is true, otherwise `{id_token}` (a fresh Google ID token; `401 INVALID_GOOGLE_TOKEN` if it is not the linked account). After a Google sign-in that linked an existing account, `password_set` is false and that account's older sessions are gone.
 - **Decisions for the Android owner:** exact `limits` keys the app reads; whether `null` release fields are acceptable or the app needs real values before launch; whether the app also wants other limits exposed (e.g. rate limits).
 
 ## 2. `GET /home` (Bearer; query `recent_limit`, default 10, max 20)
@@ -52,6 +53,15 @@
 ## 6. Also unconfirmed: `GET /health`
 
 Documented `200 {status, time, checks{database, cache, queue}}; 503 when a check fails`. Actual `data.status` / `checks.*` are `"ok"`/`"fail"`; a 503 uses the error envelope with the health body in `error.details` (DEC-017). Operations tooling, not the app, normally reads this.
+
+## 6b. `POST /auth/google` (new, DEC-035; not in the original reference)
+
+- **Request:** `id_token*` (Google ID token from Credential Manager, max 8192 chars), `device_name*` (max 255 - required here, optional on login), `terms_accepted` and `terms_version` (required `true` only when the Google account has no Stashly account yet).
+- **Response:** exactly the login shape `{"data": {"user", "token"}}`: `200` for an existing or newly linked account, `201` for a new account.
+- **Errors:** `401 INVALID_GOOGLE_TOKEN` (bad/expired/wrong-audience token, unverified Google e-mail, e-mail already linked to another Google account), `422 VALIDATION_FAILED` (`details.terms_accepted` for a new account), `429 RATE_LIMITED` (10/min per IP), `503 SERVICE_UNAVAILABLE` (server not configured or Google keys unreachable). `INVALID_GOOGLE_TOKEN` is a **new error code**.
+- **Availability:** `GET /config` returns `auth.google_enabled`; hide the Google button when it is `false`.
+- **Audience:** the server accepts tokens whose `aud` equals its `GOOGLE_CLIENT_ID`. With Credential Manager that is the *web* client id passed as `serverClientId`; the Android owner must use the same id.
+- **Decisions for the Android owner:** the new error code and its handling (do not log the user out on it); required `device_name`; the `201`/`200` split; DEC-036 (a Google-only user has no password, so `DELETE /me` and `PUT /me/password` cannot be used as they are).
 
 ## 7. What is needed to close this
 

@@ -22,3 +22,10 @@
 | SEC-018 | Account deletion | User data and tokens are removed |
 | SEC-019 | Refresh token rotation | Old token is unusable |
 | SEC-020 | Idempotency key replay | Same result within 24h; no duplicate side effect |
+| SEC-021 | Google ID token with a wrong signature, `alg` none/HS256, wrong `aud`/`iss`, or expired | 401 `INVALID_GOOGLE_TOKEN`; no account or token created |
+| SEC-022 | Google token with `email_verified` false/missing/string | 401; an existing account is never linked |
+| SEC-023 | Google e-mail matches an account already linked to another Google id | 401; no takeover |
+| SEC-024 | Password login on a Google-only account | Same 401 `INVALID_CREDENTIALS` and hashing time as an unknown e-mail |
+| SEC-025 | Logs after Google sign-in attempts | No token, claims or e-mail; reason code only |
+| SEC-026 | Pre-registered password after Google linking (DEC-037) | Linking clears the password and revokes sessions; the attacker's password and token both fail |
+| SEC-027 | Delete a Google-only account (DEC-036) | Needs a valid `id_token` for the linked Google account; foreign, expired, wrong-audience, unverified and missing tokens fail and nothing is deleted |

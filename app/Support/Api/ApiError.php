@@ -26,6 +26,8 @@ final class ApiError
 
     public const UNAUTHENTICATED = 'UNAUTHENTICATED';
 
+    public const INVALID_GOOGLE_TOKEN = 'INVALID_GOOGLE_TOKEN';
+
     public const FORBIDDEN = 'FORBIDDEN';
 
     public const NOT_FOUND = 'NOT_FOUND';

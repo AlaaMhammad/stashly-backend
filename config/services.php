@@ -14,6 +14,14 @@ return [
     |
     */
 
+    // Google Sign-In (DEC-035). client_id is the OAuth 2.0 client ID that ID tokens must be issued
+    // for (the "audience"); for Android with Credential Manager this is the *web* client ID passed
+    // as serverClientId. Empty = feature disabled and GET /config reports auth.google_enabled=false.
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID') ?: null,
+        'jwks_url' => 'https://www.googleapis.com/oauth2/v3/certs',
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

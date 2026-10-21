@@ -88,6 +88,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(self::limit('login_per_minute'))
             ->by(self::emailKey($request).'|'.$request->ip()));
 
+        RateLimiter::for('google-auth', fn (Request $request) => Limit::perMinute(self::limit('google_auth_per_minute'))
+            ->by('ip:'.$request->ip()));
+
         RateLimiter::for('register', fn (Request $request) => Limit::perHour(self::limit('register_per_hour'))
             ->by('ip:'.$request->ip()));
 

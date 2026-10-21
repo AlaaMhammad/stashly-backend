@@ -25,7 +25,7 @@ class LoginTest extends TestCase
 
         $response->assertOk()
             ->assertExactJsonStructure(['data' => [
-                'user' => ['id', 'display_name', 'email', 'created_at'],
+                'user' => ['id', 'display_name', 'email', 'created_at', 'password_set'],
                 'token' => ['access_token', 'token_type', 'expires_at'],
             ]])
             ->assertJsonPath('data.user.id', $user->id)

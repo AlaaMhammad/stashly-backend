@@ -65,9 +65,9 @@ class AuthController extends Controller
         $data = $request->validated();
         $user = User::query()->where('email', $data['email'])->first();
 
-        if ($user === null) {
-            // Spend the same hashing time as a real check so response timing
-            // does not reveal whether the email is registered.
+        if ($user === null || $user->password === null) {
+            // Spend the same hashing time as a real check so response timing does not reveal
+            // whether the email is registered, or that it is a Google-only account (no password).
             Hash::make($data['password']);
 
             return $this->invalidCredentials();

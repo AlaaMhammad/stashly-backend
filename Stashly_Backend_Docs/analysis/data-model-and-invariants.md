@@ -5,6 +5,8 @@ This is a logical model, not a final migration specification. Inspect the reposi
 ## User
 - ULID ID.
 - display name, unique email, password hash, terms acceptance/version fields as required by implementation.
+- Linking Google to an existing account sets `password` to NULL (DEC-037); `password_set` in the API user object is `password IS NOT NULL` (DEC-036).
+- Google Sign-In (DEC-035): nullable unique `google_id` (Google's `sub`), nullable `avatar_url` (stored, not exposed) and a nullable password hash (Google-only accounts have none; password login rejects them like unknown e-mails).
 - Sanctum tokens or equivalent token table.
 - Do not expose password or internal fields.
 

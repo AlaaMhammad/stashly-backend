@@ -60,6 +60,10 @@ class SystemController extends Controller
             'privacy' => [
                 'url' => filled($config['privacy']['url']) ? $config['privacy']['url'] : route('privacy'),
             ],
+            // Additive (DEC-035): lets the app hide the Google button when the server is not configured.
+            'auth' => [
+                'google_enabled' => filled(config('services.google.client_id')),
+            ],
             'limits' => $config['limits'],
         ], 200, [
             'Cache-Control' => 'public, max-age='.$config['config_cache_seconds'],

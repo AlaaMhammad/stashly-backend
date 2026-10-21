@@ -24,6 +24,7 @@ class UserResource extends JsonResource
             'display_name' => $this->display_name,
             'email' => $this->email,
             'created_at' => ApiDate::format($this->created_at),
+            'password_set' => $this->password !== null,
         ];
     }
 }

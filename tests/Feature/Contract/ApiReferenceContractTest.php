@@ -85,7 +85,7 @@ class ApiReferenceContractTest extends TestCase
             'terms_accepted' => true, 'terms_version' => '1', 'device_name' => 'Pixel',
         ])->assertCreated()->json('data');
         $this->assertSame(['user', 'token'], array_keys($registered));
-        $this->assertSame(['id', 'display_name', 'email', 'created_at'], array_keys($registered['user']));
+        $this->assertSame(['id', 'display_name', 'email', 'created_at', 'password_set'], array_keys($registered['user']));
         $this->assertToken($registered['token']);
         $this->postJson('/api/v1/auth/register', [
             'display_name' => 'Dup', 'email' => 'lina@example.test', 'password' => 'first-password', 'password_confirmation' => 'first-password', 'terms_accepted' => true,
@@ -96,7 +96,7 @@ class ApiReferenceContractTest extends TestCase
         $this->postJson('/api/v1/auth/login', ['email' => 'lina@example.test', 'password' => 'nope'])->assertStatus(401)->assertJsonPath('error.code', 'INVALID_CREDENTIALS');
         $auth = ['Authorization' => 'Bearer '.$login['token']['access_token']];
 
-        $this->getJson('/api/v1/me', $auth)->assertOk()->assertJsonStructure(['data' => ['user' => ['id', 'display_name', 'email', 'created_at']]]);
+        $this->getJson('/api/v1/me', $auth)->assertOk()->assertJsonStructure(['data' => ['user' => ['id', 'display_name', 'email', 'created_at', 'password_set']]]);
         $this->patchJson('/api/v1/me', ['display_name' => 'Lina M'], $auth)->assertOk()->assertJsonPath('data.user.display_name', 'Lina M');
 
         // --- Links (9)

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CollectionController;
+use App\Http\Controllers\Api\V1\GoogleAuthController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\LinkController;
 use App\Http\Controllers\Api\V1\LinkMetadataController;
@@ -30,6 +31,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
     // API-AUTH-002
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+    // API-AUTH-008 (DEC-035)
+    Route::post('/google', GoogleAuthController::class)->middleware('throttle:google-auth');
     // API-AUTH-005
     Route::post('/forgot-password', [PasswordResetController::class, 'forgot'])->middleware('throttle:forgot-password');
     // API-AUTH-006

@@ -27,6 +27,7 @@ class ConfigTest extends TestCase
                 'latest_app_version' => '1.2.0',
                 'terms' => ['version' => '2026-10-01', 'url' => 'https://example.test/terms'],
                 'privacy' => ['url' => 'https://example.test/privacy'],
+                'auth' => ['google_enabled' => false],
                 'limits' => [
                     'url_max_length' => 2048,
                     'title_max_length' => 300,
@@ -39,6 +40,19 @@ class ConfigTest extends TestCase
                     'page_size_max' => 50,
                 ],
             ]]);
+    }
+
+    public function test_reports_whether_google_sign_in_is_configured(): void
+    {
+        config(['services.google.client_id' => null]);
+        $this->getJson('/api/v1/config')->assertJsonPath('data.auth', ['google_enabled' => false]);
+
+        config(['services.google.client_id' => '']);
+        $this->getJson('/api/v1/config')->assertJsonPath('data.auth.google_enabled', false);
+
+        config(['services.google.client_id' => '1234-abc.apps.googleusercontent.com']);
+        $response = $this->getJson('/api/v1/config')->assertJsonPath('data.auth', ['google_enabled' => true]);
+        $this->assertStringNotContainsString('1234-abc', $response->getContent(), 'The client id itself is not exposed.');
     }
 
     public function test_unset_app_versions_are_null_not_invented(): void

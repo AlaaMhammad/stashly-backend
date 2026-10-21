@@ -30,6 +30,16 @@ class ApiException extends RuntimeException implements ShouldntReport
         return new self(ApiError::INVALID_URL, 422, 'This URL cannot be saved.');
     }
 
+    public static function invalidGoogleToken(string $message): self
+    {
+        return new self(ApiError::INVALID_GOOGLE_TOKEN, 401, $message);
+    }
+
+    public static function googleUnavailable(string $message): self
+    {
+        return new self(ApiError::SERVICE_UNAVAILABLE, 503, $message);
+    }
+
     public static function invalidCursor(): self
     {
         return new self(ApiError::INVALID_CURSOR, 422, 'The cursor is invalid or does not match these filters.');
