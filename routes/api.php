@@ -40,7 +40,9 @@ Route::prefix('auth')->group(function () {
     // API-AUTH-005
     Route::post('/forgot-password', [PasswordResetController::class, 'forgot'])->middleware('throttle:forgot-password');
     // API-AUTH-006
-    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
+    // API-AUTH-009 (DEC-040)
+    Route::post('/verify-reset-code', [PasswordResetController::class, 'verify'])->middleware('throttle:reset-code');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:reset-code');
 
     Route::middleware('auth:sanctum')->group(function () {
         // API-AUTH-003

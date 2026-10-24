@@ -173,10 +173,10 @@ class ApiReferenceContractTest extends TestCase
         $this->putJson('/api/v1/me/password', ['current_password' => 'first-password', 'password' => 'second-password', 'password_confirmation' => 'second-password'], $auth)
             ->assertOk()->assertJsonStructure(['data' => ['message']]);
         $this->postJson('/api/v1/auth/forgot-password', ['email' => 'nobody@example.test'])->assertOk()->assertJsonStructure(['data' => ['message']]);
-        $this->postJson('/api/v1/auth/reset-password', ['email' => 'lina@example.test', 'token' => 'bad', 'password' => 'third-password', 'password_confirmation' => 'third-password'])
+        $this->postJson('/api/v1/auth/reset-password', ['email' => 'lina@example.test', 'code' => '000000', 'password' => 'third-password', 'password_confirmation' => 'third-password'])
             ->assertStatus(422)->assertJsonPath('error.code', 'TOKEN_INVALID_OR_EXPIRED');
-        $resetToken = Password::broker()->createToken(User::sole());
-        $this->postJson('/api/v1/auth/reset-password', ['email' => 'lina@example.test', 'token' => $resetToken, 'password' => 'third-password', 'password_confirmation' => 'third-password'])
+        $resetToken = $this->resetCodeFor(User::sole());
+        $this->postJson('/api/v1/auth/reset-password', ['email' => 'lina@example.test', 'code' => $resetToken, 'password' => 'third-password', 'password_confirmation' => 'third-password'])
             ->assertOk()->assertJsonStructure(['data' => ['message']]);
 
         // --- Tokens: login, refresh, logout, delete link / collection / account

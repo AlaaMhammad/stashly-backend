@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Models\Link;
 use App\Models\User;
+use App\Services\Auth\PasswordResetCodeService;
 use App\Services\Auth\TokenIssuer;
 use App\Services\Links\LinkService;
 use App\Services\Metadata\DnsResolver;
@@ -67,6 +68,18 @@ abstract class TestCase extends BaseTestCase
     protected function tokenFor(User $user, string $device = 'test device'): string
     {
         return app(TokenIssuer::class)->issue($user, $device)->plainTextToken;
+    }
+
+    /**
+     * Issue a password-reset code for $user the way POST /auth/forgot-password does (DEC-040) and
+     * return it in clear text. Any earlier code is dropped first so the resend cooldown never gets in the way.
+     */
+    protected function resetCodeFor(User $user): string
+    {
+        $codes = app(PasswordResetCodeService::class);
+        $codes->forget($user->getEmailForPasswordReset());
+
+        return $codes->issue($user);
     }
 
     /**

@@ -30,6 +30,7 @@ class Preflight extends Command
             $this->check('Queue is asynchronous (not sync)', config('queue.default') !== 'sync'),
             $this->check('Cache is shared (not array)', config('cache.default') !== 'array'),
             $this->check('Mail sends (not log/array)', ! in_array(config('mail.default'), ['log', 'array'], true)),
+            $this->check('Mail from address is not a placeholder (MAIL_FROM_ADDRESS)', filled(config('mail.from.address')) && ! preg_match('/@(example\.(com|test|org)|yourdomain\.com)$/i', (string) config('mail.from.address')), warn: true),
             // DEC-021: without these, /config points at the DRAFT pages served by this backend.
             $this->check('Terms/Privacy URLs and a final (non-draft) terms version are configured', filled(config('stashly.terms.url')) && filled(config('stashly.privacy.url')) && filled(config('stashly.terms.version')) && config('stashly.terms.version') !== 'draft-1', warn: true),
             // DEC-035: without it POST /auth/google answers 503 and GET /config reports auth.google_enabled=false.

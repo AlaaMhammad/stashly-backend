@@ -9,7 +9,7 @@
 | SEC-005 | PATCH link includes `user_id`, `normalized_url`, `metadata` | Reject read-only fields |
 | SEC-006 | Unknown email vs wrong password | Same outward login error |
 | SEC-007 | Forgot password for unknown email | Same 200 response as known email |
-| SEC-008 | Reuse password-reset token | Reject |
+| SEC-008 | Reuse password-reset code | Reject (single use, DEC-040) |
 | SEC-009 | URL uses `file:`, `data:`, `javascript:`, `intent:` | 422 `INVALID_URL` |
 | SEC-010 | URL contains username/password | 422 `INVALID_URL` |
 | SEC-011 | URL resolves to private/loopback/link-local address | Block fetch |
@@ -34,3 +34,5 @@
 | SEC-030 | AI prompt injection and made-up ids | Saved text stays in DATA sections; ids the model invents are dropped from `referenced_links` |
 | SEC-031 | AI enhancements and other users' data (DEC-039) | key-points/action-plan/related on another user's link are 404 and send nothing; related and suggest-collection never send or return another user's links/collections |
 | SEC-032 | AI output guards (DEC-039) | Quotes not in the supplied text, ids not owned by the caller, bad enums and unnumbered/over-long lists are dropped or rejected (502) |
+| SEC-033 | Guessing the 6-digit reset code (DEC-040) | 5 wrong guesses delete the code; expiry after 15 minutes; limits per e-mail and IP; wrong / unknown e-mail / expired answer identically |
+| SEC-034 | Reset code at rest and in transit | Stored only as a keyed HMAC; never logged; mail failure logs carry no address or code and do not change the API response |

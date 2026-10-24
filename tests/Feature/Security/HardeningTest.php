@@ -88,7 +88,7 @@ class HardeningTest extends TestCase
 
     public function test_the_reset_password_page_is_not_cacheable_or_frameable(): void
     {
-        $response = $this->get('/reset-password?token=t&email=a%40example.test');
+        $response = $this->get('/reset-password?email=a%40example.test');
 
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
         $this->assertSame('DENY', $response->headers->get('X-Frame-Options'));

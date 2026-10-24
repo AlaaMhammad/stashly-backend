@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 /**
@@ -42,10 +41,10 @@ class SensitiveDataLoggingTest extends TestCase
             'password_confirmation' => 'changed-secret-3',
         ])->assertOk();
 
-        $resetToken = Password::broker()->createToken(User::sole());
+        $resetToken = $this->resetCodeFor(User::sole());
         $this->postJson('/api/v1/auth/reset-password', [
             'email' => 'lina@example.test',
-            'token' => $resetToken,
+            'code' => $resetToken,
             'password' => 'reset-secret-4',
             'password_confirmation' => 'reset-secret-4',
         ])->assertOk();

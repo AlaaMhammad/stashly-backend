@@ -139,20 +139,20 @@ class ProfileTest extends TestCase
         $user = User::factory()->create(['email' => 'lina@example.test']);
         $token = $this->tokenFor($user, 'phone');
         $this->tokenFor($user, 'tablet');
-        Password::broker()->createToken($user);
+        $this->resetCodeFor($user);
 
         $bystander = User::factory()->create(['email' => 'other@example.test']);
         $bystanderToken = $this->tokenFor($bystander);
-        Password::broker()->createToken($bystander);
+        $this->resetCodeFor($bystander);
 
         $this->withToken($token)->deleteJson('/api/v1/me', ['password' => 'password'])->assertNoContent();
 
         $this->assertModelMissing($user);
         $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $user->id]);
-        $this->assertDatabaseMissing('password_reset_tokens', ['email' => 'lina@example.test']);
+        $this->assertDatabaseMissing('password_reset_codes', ['email' => 'lina@example.test']);
 
         $this->assertModelExists($bystander);
-        $this->assertDatabaseHas('password_reset_tokens', ['email' => 'other@example.test']);
+        $this->assertDatabaseHas('password_reset_codes', ['email' => 'other@example.test']);
         $this->assertSame(1, DB::table('personal_access_tokens')->count());
 
         $this->resetAuth();

@@ -18,7 +18,6 @@ use Illuminate\Queue\Events\QueueBusy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\TestHandler;
 use RuntimeException;
@@ -124,7 +123,7 @@ class ObservabilityTest extends TestCase
         $token = $register->json('data.token.access_token');
         $this->postJson('/api/v1/auth/login', ['email' => 'audit@example.test', 'password' => $secrets[2]])->assertStatus(401);
         $this->postJson('/api/v1/auth/forgot-password', ['email' => 'audit@example.test'])->assertOk();
-        $resetToken = Password::broker()->createToken(User::sole());
+        $resetToken = $this->resetCodeFor(User::sole());
 
         $auth = ['Authorization' => 'Bearer '.$token];
         $url = 'https://private-host.example/very/private/path?secret=audit-url-secret';
@@ -156,7 +155,7 @@ class ObservabilityTest extends TestCase
 
         $this->getJson('/api/v1/me/export', $auth)->assertOk()->streamedContent();
         $this->putJson('/api/v1/me/password', ['current_password' => $secrets[0], 'password' => $secrets[1], 'password_confirmation' => $secrets[1]], $auth)->assertOk();
-        $this->postJson('/api/v1/auth/reset-password', ['email' => 'audit@example.test', 'token' => $resetToken, 'password' => $secrets[0], 'password_confirmation' => $secrets[0]])->assertOk();
+        $this->postJson('/api/v1/auth/reset-password', ['email' => 'audit@example.test', 'code' => $resetToken, 'password' => $secrets[0], 'password_confirmation' => $secrets[0]])->assertOk();
         $final = $this->postJson('/api/v1/auth/login', ['email' => 'audit@example.test', 'password' => $secrets[0]])->json('data.token.access_token');
         $this->app['auth']->forgetGuards();
         $this->deleteJson('/api/v1/me', ['password' => $secrets[0]], ['Authorization' => 'Bearer '.$final])->assertNoContent();

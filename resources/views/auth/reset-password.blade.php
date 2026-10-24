@@ -24,24 +24,26 @@
 <main>
     <h1>Reset your password</h1>
 
-    @if ($token === '' || $email === '')
-        <p class="notice error">This reset link is incomplete. Request a new one from the Stashly app.</p>
-    @else
-        <form id="reset-form" novalidate
-              data-endpoint="{{ url('/api/v1/auth/reset-password') }}"
-              data-token="{{ $token }}"
-              data-email="{{ $email }}">
-            <label for="password">New password</label>
-            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
-            <p class="hint">8 to 128 characters.</p>
+    <p class="hint">Enter the 6-digit code from the email we sent you, then choose a new password. Request a code from the Stashly app.</p>
 
-            <label for="password_confirmation">Confirm new password</label>
-            <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+    <form id="reset-form" novalidate
+          data-endpoint="{{ url('/api/v1/auth/reset-password') }}">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" maxlength="255" value="{{ $email }}" required>
 
-            <button type="submit">Set new password</button>
-        </form>
-        <p id="result" class="notice" hidden></p>
-    @endif
+        <label for="code">6-digit code</label>
+        <input id="code" name="code" type="text" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" maxlength="6" required>
+
+        <label for="password">New password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+        <p class="hint">8 to 128 characters.</p>
+
+        <label for="password_confirmation">Confirm new password</label>
+        <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+
+        <button type="submit">Set new password</button>
+    </form>
+    <p id="result" class="notice" hidden></p>
 </main>
 
 <script>
@@ -72,8 +74,8 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
-                email: form.dataset.email,
-                token: form.dataset.token,
+                email: form.email.value.trim(),
+                code: form.code.value.replace(/\s+/g, ''),
                 password: password,
                 password_confirmation: confirmation
             })
@@ -87,10 +89,9 @@
             }
             var error = (res.body && res.body.error) || {};
             if (error.code === 'TOKEN_INVALID_OR_EXPIRED') {
-                form.hidden = true;
-                show('error', 'This reset link is invalid or has expired. Request a new one from the Stashly app.');
-            } else if (error.code === 'VALIDATION_FAILED' && error.details && error.details.password) {
-                show('error', [].concat(error.details.password).join(' '));
+                show('error', 'This code is invalid or has expired. Check the code, or request a new one from the Stashly app.');
+            } else if (error.code === 'VALIDATION_FAILED' && error.details && (error.details.password || error.details.code || error.details.email)) {
+                show('error', [].concat(error.details.password || [], error.details.code || [], error.details.email || []).join(' '));
             } else if (error.code === 'RATE_LIMITED') {
                 show('error', 'Too many attempts. Please wait a moment and try again.');
             } else {

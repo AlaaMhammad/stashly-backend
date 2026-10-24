@@ -52,6 +52,11 @@ return [
         'login_per_minute' => 5,
         'register_per_hour' => 10,
         'forgot_password_per_hour' => 3,
+        // POST /auth/forgot-password also per IP: stops one client mailing many different addresses (SMTP quota).
+        'forgot_password_per_ip_per_hour' => 10,
+        // POST /auth/verify-reset-code and /auth/reset-password (DEC-040).
+        'reset_code_per_email_per_hour' => 20,
+        'reset_code_per_ip_per_hour' => 40,
         'link_preview_per_minute' => 20,
         'link_save_per_minute' => 60,
         'export_per_ten_minutes' => 1,
@@ -61,6 +66,13 @@ return [
         'ai_per_minute' => 10,
         'metadata_refresh_per_link_per_minute' => 1,
         'metadata_refresh_per_minute' => 5,
+    ],
+
+    // Password reset by 6-digit code (DEC-040).
+    'password_reset' => [
+        'code_ttl_minutes' => 15,
+        'max_attempts' => 5,
+        'resend_cooldown_seconds' => 60,
     ],
 
     // POST /ai/ask sends at most this many of the user's most recent links to the model (DEC-038).

@@ -219,9 +219,9 @@ class GoogleAuthTest extends TestCase
         $this->signIn(['terms_accepted' => null])->assertOk();
         $this->assertNull($user->fresh()->password);
 
-        $token = Password::broker()->createToken($user);
+        $token = $this->resetCodeFor($user);
         $this->postJson('/api/v1/auth/reset-password', [
-            'email' => 'lina@example.test', 'token' => $token, 'password' => 'brand-new-password', 'password_confirmation' => 'brand-new-password',
+            'email' => 'lina@example.test', 'code' => $token, 'password' => 'brand-new-password', 'password_confirmation' => 'brand-new-password',
         ])->assertOk();
         $this->postJson('/api/v1/auth/login', ['email' => 'lina@example.test', 'password' => 'brand-new-password'])->assertOk();
     }
@@ -415,9 +415,9 @@ class GoogleAuthTest extends TestCase
         $this->signIn()->assertCreated();
         $user = User::sole();
 
-        $token = Password::broker()->createToken($user);
+        $token = $this->resetCodeFor($user);
         $this->postJson('/api/v1/auth/reset-password', [
-            'email' => 'lina@example.test', 'token' => $token, 'password' => 'brand-new-password', 'password_confirmation' => 'brand-new-password',
+            'email' => 'lina@example.test', 'code' => $token, 'password' => 'brand-new-password', 'password_confirmation' => 'brand-new-password',
         ])->assertOk();
 
         $this->postJson('/api/v1/auth/login', ['email' => 'lina@example.test', 'password' => 'brand-new-password'])->assertOk();
@@ -529,8 +529,8 @@ class GoogleAuthTest extends TestCase
         Notification::fake();
         $this->signIn()->assertCreated();
         $user = User::sole();
-        $reset = Password::broker()->createToken($user);
-        $this->postJson('/api/v1/auth/reset-password', ['email' => 'lina@example.test', 'token' => $reset, 'password' => 'brand-new-password', 'password_confirmation' => 'brand-new-password'])->assertOk();
+        $reset = $this->resetCodeFor($user);
+        $this->postJson('/api/v1/auth/reset-password', ['email' => 'lina@example.test', 'code' => $reset, 'password' => 'brand-new-password', 'password_confirmation' => 'brand-new-password'])->assertOk();
         $login = $this->postJson('/api/v1/auth/login', ['email' => 'lina@example.test', 'password' => 'brand-new-password'])->json('data.token.access_token');
 
         $this->withToken($login)->deleteJson('/api/v1/me', ['password' => 'brand-new-password'])->assertNoContent();

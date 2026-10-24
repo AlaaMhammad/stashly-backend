@@ -69,3 +69,9 @@ Return 429 `RATE_LIMITED` and `Retry-After`.
 - Same key handling, rate limit (shared `ai` limiter) and prompt-injection stance as DEC-038. Extra guards: `memorable_quotes` must occur in the supplied text, `related` and `suggest-collection` only ever return ids of the caller's own links/collections, `step_number` is server-assigned, enums are validated.
 - `suggest-collection` sends the host, never the full URL; logs hold only the reason code, never titles, URLs or the request body.
 - A GET (`related`) triggers a provider call; it is authenticated and rate limited like the POSTs.
+
+## Password reset by code (DEC-040)
+
+- 6-digit code from `random_int`, 15-minute life, one active code per e-mail, stored as HMAC-SHA256 keyed with the app key, deleted on use / expiry / 5th wrong guess. Brute force: at most 5 guesses per code, 3 codes per hour per e-mail (about 15 guesses per hour in a million), plus per-IP limits.
+- Unknown e-mail, wrong code and expired code give the same 422. The reset e-mail is sent after the response so response timing does not depend on SMTP; a database write for known accounts remains a small timing difference.
+- Mail failures are logged without the address or the code, and never change the response.

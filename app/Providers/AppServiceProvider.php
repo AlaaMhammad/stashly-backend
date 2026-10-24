@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
-use App\Models\User;
 use App\Services\Links\UrlNormalizer;
 use App\Services\Metadata\CurlTransport;
 use App\Services\Metadata\DnsResolver;
@@ -11,7 +10,6 @@ use App\Services\Metadata\HttpTransport;
 use App\Services\Metadata\MetadataUrlGuard;
 use App\Services\Metadata\SafeFetcher;
 use App\Services\Metadata\SystemDnsResolver;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Events\JobFailed;
@@ -52,12 +50,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
-        // Reset emails link to the web page that calls POST /api/v1/auth/reset-password.
-        ResetPassword::createUrlUsing(fn (User $user, string $token) => url('/reset-password').'?'.http_build_query([
-            'token' => $token,
-            'email' => $user->getEmailForPasswordReset(),
-        ]));
-
         if ($this->app->isProduction()) {
             URL::forceScheme('https');
         }
@@ -94,8 +86,16 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('register', fn (Request $request) => Limit::perHour(self::limit('register_per_hour'))
             ->by('ip:'.$request->ip()));
 
-        RateLimiter::for('forgot-password', fn (Request $request) => Limit::perHour(self::limit('forgot_password_per_hour'))
-            ->by(self::emailKey($request)));
+        RateLimiter::for('forgot-password', fn (Request $request) => [
+            Limit::perHour(self::limit('forgot_password_per_hour'))->by(self::emailKey($request)),
+            Limit::perHour(self::limit('forgot_password_per_ip_per_hour'))->by('ip:'.$request->ip()),
+        ]);
+
+        // Verifying / using a reset code: each wrong guess is also capped per code (5); these are the outer bounds.
+        RateLimiter::for('reset-code', fn (Request $request) => [
+            Limit::perHour(self::limit('reset_code_per_email_per_hour'))->by(self::emailKey($request)),
+            Limit::perHour(self::limit('reset_code_per_ip_per_hour'))->by('ip:'.$request->ip()),
+        ]);
 
         RateLimiter::for('link-preview', fn (Request $request) => Limit::perMinute(self::limit('link_preview_per_minute'))
             ->by(self::userOrIpKey($request)));

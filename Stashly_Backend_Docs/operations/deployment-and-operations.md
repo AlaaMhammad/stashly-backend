@@ -24,7 +24,9 @@
 - [ ] Failed jobs monitored and reviewed.
 - [x] Scheduled cleanup registered and verified. *(Registration verified in tests; the production cron entry for `schedule:run` is UNVERIFIED.)*
 - [ ] Metadata job egress restrictions active.
-- [ ] Email queue delivery monitored.
+- [x] Password-reset emails are NOT queued: they are sent immediately after the response, so they need no queue worker or cron (shared hosting safe). A failed send is logged as `Password reset email could not be sent.` (error class, redacted detail, user id) and the API still answers 200. Watch the log for it. *(`PasswordResetTest`; real SMTP delivery still UNVERIFIED.)*
+- [ ] Send a real reset code to a mailbox you own and check the e-mail renders in Gmail, Outlook and Apple Mail (UNVERIFIED).
+- [ ] Mail settings (Hostinger): `MAIL_MAILER=smtp`, `MAIL_HOST=smtp.hostinger.com`, `MAIL_PORT=465`, `MAIL_SCHEME=smtps` (Laravel 12 has no `MAIL_ENCRYPTION`; for port 587 use `MAIL_SCHEME=smtp`), real `MAIL_USERNAME`/`MAIL_PASSWORD`/`MAIL_FROM_ADDRESS`, `MAIL_TIMEOUT=10`; `php artisan stashly:preflight` warns about a placeholder from-address.
 - [ ] No queue job can access internal services via arbitrary URL fetch.
 
 ## Metadata worker (security-sensitive)

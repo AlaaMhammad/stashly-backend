@@ -24,6 +24,10 @@ class AccountDeletionService
                 ->where('email', $user->getEmailForPasswordReset())
                 ->delete();
 
+            DB::table('password_reset_codes')
+                ->where('email', $user->getEmailForPasswordReset())
+                ->delete();
+
             DB::table('sessions')->where('user_id', $user->getKey())->delete();
 
             $user->delete();

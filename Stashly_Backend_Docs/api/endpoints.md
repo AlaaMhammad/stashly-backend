@@ -9,7 +9,7 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-SYS-001 | `GET /health` | Public | Database/cache/queue checks; 200 healthy, 503 on check failure |
 | API-SYS-002 | `GET /config` | Public | API/app versions, Terms/Privacy URLs, limits; cache 5 min |
 
-## Authentication (8)
+## Authentication (9)
 
 | ID | Method + path | Auth | Key behavior |
 |---|---|---|---|
@@ -17,9 +17,10 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-AUTH-002 | `POST /auth/login` | Public | Generic invalid credentials; 200 |
 | API-AUTH-003 | `POST /auth/logout` | Bearer | Revoke current token or all tokens; 204 |
 | API-AUTH-004 | `POST /auth/refresh` | Bearer | Rotate token; revoke old; 200 |
-| API-AUTH-005 | `POST /auth/forgot-password` | Public | Always 200; queued reset email |
-| API-AUTH-006 | `POST /auth/reset-password` | Public | 60-minute single-use token; revoke all tokens |
+| API-AUTH-005 | `POST /auth/forgot-password` | Public | Always 200; emails a **6-digit code** (15 min) immediately after the response (no queue worker needed); repeat within 60 s sends nothing new; 3/hour per email and 10/hour per IP (DEC-040) |
+| API-AUTH-006 | `POST /auth/reset-password` | Public | Body `email, code (6 digits), password, password_confirmation`; single-use 15-minute code, 5 wrong guesses allowed; revoke all tokens; 422 `TOKEN_INVALID_OR_EXPIRED`; 20/hour per email, 40/hour per IP (DEC-040: replaces the reset-link `token`) |
 | API-AUTH-007 | `PUT /me/password` | Bearer | Verify current password; revoke other tokens |
+| API-AUTH-009 | `POST /auth/verify-reset-code` | Public | Body `email, code`; 200 `{valid: true}` or 422 `TOKEN_INVALID_OR_EXPIRED`; does not use the code up; same limits as reset (DEC-040, owner-requested extension) |
 | API-AUTH-008 | `POST /auth/google` | Public | Google ID token sign-in, link or sign-up; 200 or 201 (DEC-035, owner-requested extension) |
 
 ## Profile/account (5)

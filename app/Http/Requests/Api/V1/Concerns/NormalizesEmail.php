@@ -12,6 +12,11 @@ trait NormalizesEmail
 {
     protected function prepareForValidation(): void
     {
+        $this->normalizeEmail();
+    }
+
+    protected function normalizeEmail(): void
+    {
         $email = $this->input('email');
 
         if (is_string($email)) {

@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -105,7 +104,7 @@ class ExportTest extends TestCase
         $box = $stranger->collections()->create(['name' => 'Stranger box']);
         $this->saveLink($stranger, 'https://stranger.example/secret', ['title' => 'Stranger title', 'note' => 'stranger note', 'tags' => ['strangertag'], 'collection_ids' => [$box->id]]);
         $this->saveLink($this->user, 'https://example.com/mine', ['tags' => ['mine']]);
-        $resetToken = Password::broker()->createToken($this->user);
+        $resetToken = $this->resetCodeFor($this->user);
         $token = $this->tokenFor($this->user);
         $this->withHeader('Idempotency-Key', '5f0c6d1e-7b2a-4c3d-9e8f-0a1b2c3d4e5f')->postJson('/api/v1/links', ['url' => 'https://example.com/keyed']);
 

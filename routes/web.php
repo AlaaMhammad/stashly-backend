@@ -17,12 +17,11 @@ foreach (['terms' => 'legal.terms', 'privacy' => 'legal.privacy'] as $path => $v
     ]))->name($path);
 }
 
-// Contract section 5: password-reset page linked from the reset email.
-// It calls POST /api/v1/auth/reset-password; the token never leaves via Referer.
+// Password-reset page for the 6-digit code (DEC-040): e-mail, code and new password; it calls
+// POST /api/v1/auth/reset-password. The Android app does the same in-app and never opens this page.
 Route::get('/reset-password', function (Request $request) {
     return response()
         ->view('auth.reset-password', [
-            'token' => is_string($request->query('token')) ? $request->query('token') : '',
             'email' => is_string($request->query('email')) ? $request->query('email') : '',
         ])
         ->withHeaders([

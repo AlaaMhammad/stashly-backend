@@ -183,6 +183,13 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [x] 4 test files with a faked Gemini, RouteMatrixTest at 39 operations, Postman folder 09 (6 requests), Arabic report `Stashly_Backend_Docs/تقارير/ai_advanced_features_report.md`.
 - [ ] Open: real Gemini smoke test (nothing has called Gemini yet), cache invalidation when link text changes, Android confirmation, MySQL run.
 
+### Phase 12 - Password reset by 6-digit code (owner-requested change, DEC-040)
+
+- [x] Immediate (non-queued) reset e-mail after the response, failures logged safely; per-IP limit; `MAIL_SCHEME=smtps` Hostinger preset; SMTP timeout.
+- [x] `password_reset_codes` table (HMAC-hashed code, attempts, 15-minute expiry); `POST /auth/verify-reset-code`; `POST /auth/reset-password` takes `code`; responsive HTML e-mail (`emails.auth.password-reset-otp`) + text part.
+- [x] Tests (`PasswordResetTest`, 31), RouteMatrixTest at 40 operations, Postman updated, Arabic report `Stashly_Backend_Docs/تقارير/otp_mail_and_template_report.md`.
+- [ ] Open: real SMTP send on Hostinger, the e-mail viewed in real clients (Gmail/Outlook/Apple Mail), Android confirmation, MySQL run.
+
 ## 6. Global acceptance criteria
 
 - All endpoints in `Stashly_Backend_Docs/api/endpoints.md` implemented or explicitly blocked by a recorded decision.
