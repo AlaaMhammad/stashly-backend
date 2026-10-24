@@ -33,7 +33,7 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-PROF-004 | `GET /me/export` | Bearer | JSON attachment; 1 per 10 min |
 | API-PROF-005 | `DELETE /me` | Bearer | Password check (or, for an account without a password, a fresh Google `id_token`, DEC-036), permanent data/token deletion; 204 |
 
-## Saved links (9)
+## Saved links (9) and library tools (5, DEC-041)
 
 | ID | Method + path | Auth | Key behavior |
 |---|---|---|---|
@@ -46,6 +46,11 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-LINK-007 | `PUT /links/{link}/collections` | Bearer | Full replacement; empty means Unsorted |
 | API-LINK-008 | `PUT /links/{link}/tags` | Bearer | Full replacement; max 20 tags |
 | API-LINK-009 | `POST /links/{link}/metadata/refresh` | Bearer | Retry metadata; 202; max once/min/link |
+| API-LINK-010 | `POST /links/import` | Bearer | Multipart `file` (Netscape HTML or CSV, <= 2 MB); max 100 links per request, `offset` to continue; folders become collections, default "Imported"; duplicates skipped; 200 `{imported_count, skipped_duplicates_count, skipped_invalid_count, collections_created, total_in_file, next_offset}`; 3/min |
+| API-LINK-011 | `GET /links/export?format=json\|html` | Bearer | Streamed attachment: whole library as JSON (incl. AI summaries, insights, action plans) or as a Netscape bookmark file; 5 per 10 min |
+| API-LINK-012 | `GET /links/search` | Bearer | Compound filters `query, collection_id, tag, is_favorite, is_archived, has_ai_summary, date_from, date_to`, `sort=created_at\|title`, `direction`, cursor pagination |
+| API-LINK-013 | `GET /links/broken` | Bearer | Links whose last health check found them broken; cursor pagination |
+| API-LINK-014 | `POST /links/{link}/check-health` | Bearer | HEAD (GET fallback), 5 s, 3 redirects, SSRF-guarded; stores `is_broken`, `last_checked_at`; 200 `{link_id, status_code, response_time_ms, is_broken, error, last_checked_at}`; 10/min |
 
 ## AI (6) - DEC-038, DEC-039
 
@@ -60,7 +65,7 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 
 All six AI endpoints share the 10 calls/min/user `ai` limiter; errors 503 `AI_SERVICE_UNAVAILABLE`, 504 `AI_TIMEOUT`, 502 `AI_INVALID_RESPONSE`.
 
-## Collections (6)
+## Collections (6) and sharing (2, DEC-041)
 
 | ID | Method + path | Auth | Key behavior |
 |---|---|---|---|
@@ -70,6 +75,8 @@ All six AI endpoints share the 10 calls/min/user `ai` limiter; errors 503 `AI_SE
 | API-COLL-004 | `PATCH /collections/{collection}` | Bearer | Rename/description |
 | API-COLL-005 | `DELETE /collections/{collection}` | Bearer | Delete collection; keep links |
 | API-COLL-006 | `PATCH /collections/{collection}/links` | Bearer | Atomic attach/detach, max 100 each |
+| API-COLL-007 | `POST /collections/{collection}/share` | Bearer | Body `is_public`; 200 `{is_public, share_slug, share_url}` (null while private); the address is created once and kept |
+| API-PUB-001 | `GET /public/collections/{slug}` | Public | Read-only view: collection name/description, owner display name, links (title, url, description, created_at), cursor pagination; unknown/private = 404; 60/min per IP |
 
 ## Tags, search, home (3)
 

@@ -3,10 +3,12 @@
 use App\Http\Controllers\Api\V1\AskAiController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CollectionController;
+use App\Http\Controllers\Api\V1\CollectionSharingController;
 use App\Http\Controllers\Api\V1\GoogleAuthController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\LinkController;
 use App\Http\Controllers\Api\V1\LinkInsightsController;
+use App\Http\Controllers\Api\V1\LinkLibraryController;
 use App\Http\Controllers\Api\V1\LinkMetadataController;
 use App\Http\Controllers\Api\V1\LinkPreviewController;
 use App\Http\Controllers\Api\V1\LinkRelationsController;
@@ -29,6 +31,11 @@ Route::get('/health', [SystemController::class, 'health'])
 
 // API-SYS-002
 Route::get('/config', [SystemController::class, 'config']);
+
+// API-PUB-001 (DEC-041): public read-only collection feed, no token.
+Route::get('/public/collections/{slug}', [CollectionSharingController::class, 'show'])
+    ->where('slug', '[A-Za-z0-9-]{1,80}')
+    ->middleware('throttle:public-feed');
 
 Route::prefix('auth')->group(function () {
     // API-AUTH-001
@@ -66,6 +73,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/links/preview', LinkPreviewController::class)->middleware('throttle:link-preview');
     // API-LINK-002
     Route::post('/links', [LinkController::class, 'store'])->middleware('throttle:link-save');
+    // API-LINK-010..013 (DEC-041): fixed paths, registered before /links/{link}.
+    Route::post('/links/import', [LinkLibraryController::class, 'import'])->middleware('throttle:import');
+    Route::get('/links/export', [LinkLibraryController::class, 'export'])->middleware('throttle:links-export');
+    Route::get('/links/search', [LinkLibraryController::class, 'search']);
+    Route::get('/links/broken', [LinkLibraryController::class, 'broken']);
     // API-LINK-003
     Route::get('/links', [LinkController::class, 'index']);
     // API-LINK-004
@@ -78,6 +90,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/links/{link}/collections', [LinkRelationsController::class, 'collections'])->whereUlid('link');
     // API-LINK-008
     Route::put('/links/{link}/tags', [LinkRelationsController::class, 'tags'])->whereUlid('link');
+    // API-LINK-014 (DEC-041)
+    Route::post('/links/{link}/check-health', [LinkLibraryController::class, 'checkHealth'])
+        ->whereUlid('link')
+        ->middleware('throttle:check-health');
     // API-LINK-009
     Route::post('/links/{link}/metadata/refresh', [LinkMetadataController::class, 'refresh'])
         ->whereUlid('link')
@@ -106,6 +122,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/collections/{collection}', [CollectionController::class, 'update'])->whereUlid('collection');
     // API-COLL-005
     Route::delete('/collections/{collection}', [CollectionController::class, 'destroy'])->whereUlid('collection');
+    // API-COLL-007 (DEC-041)
+    Route::post('/collections/{collection}/share', [CollectionSharingController::class, 'share'])->whereUlid('collection');
     // API-COLL-006
     Route::patch('/collections/{collection}/links', [CollectionController::class, 'updateLinks'])->whereUlid('collection');
 

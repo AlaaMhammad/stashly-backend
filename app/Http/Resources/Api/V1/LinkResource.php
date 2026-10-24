@@ -50,6 +50,11 @@ class LinkResource extends JsonResource
                 'tags' => $this->ai_tags ?? [],
                 'generated_at' => $this->ai_generated_at ? ApiDate::format($this->ai_generated_at) : null,
             ],
+            // Additive (DEC-041): result of the last on-demand check; never checked = not broken, null date.
+            'health' => [
+                'is_broken' => (bool) $this->is_broken,
+                'last_checked_at' => $this->last_checked_at ? ApiDate::format($this->last_checked_at) : null,
+            ],
             'collections' => $this->collections->map(fn (Collection $c) => ['id' => $c->id, 'name' => $c->name])->values()->all(),
             'collections_count' => $this->collections->count(),
             'tags' => $this->tags->map(fn (Tag $t) => $t->name)->values()->all(),

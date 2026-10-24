@@ -24,8 +24,8 @@ class LinkSearch
     {
         return KeysetPaginator::paginate(
             $this->filtered($user, $filters)->with(['collections', 'tags']),
-            ['created_at', 'id'],
-            $filters->sort === LinkFilters::SORT_NEWEST ? 'desc' : 'asc',
+            [$filters->sortField === 'title' ? 'sort_title' : 'created_at', 'id'],
+            $filters->direction ?? ($filters->sort === LinkFilters::SORT_NEWEST ? 'desc' : 'asc'),
             $cursor,
             $user->getKey().'|'.$filters->fingerprint(),
             $limit,
@@ -60,6 +60,22 @@ class LinkSearch
         foreach ($filters->tags as $tag) {
             // Several tags: the link must have all of them (AND).
             $query->whereHas('tags', fn (Builder $q) => $q->where('tags.name', $tag));
+        }
+        if ($filters->hasAiSummary !== null) {
+            $filters->hasAiSummary ? $query->whereNotNull('ai_summary') : $query->whereNull('ai_summary');
+        }
+        if ($filters->dateFrom !== null) {
+            $query->where('created_at', '>=', $filters->dateFrom);
+        }
+        if ($filters->dateTo !== null) {
+            $query->where('created_at', '<=', $filters->dateTo);
+        }
+        if ($filters->archivedOnly) {
+            // Nothing can be archived yet (no archive feature), so there is nothing to find.
+            $query->whereRaw('1 = 0');
+        }
+        if ($filters->broken !== null) {
+            $query->where('is_broken', $filters->broken);
         }
         if ($filters->savedWithinDays !== null) {
             $query->where('created_at', '>=', now()->subDays($filters->savedWithinDays));

@@ -22,11 +22,11 @@ class ApiReferenceContractTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const LINK_KEYS = ['id', 'original_url', 'normalized_url', 'source_domain', 'title', 'display_title', 'note', 'is_favorite', 'content_type', 'metadata', 'ai', 'collections', 'collections_count', 'tags', 'created_at', 'updated_at'];
+    private const LINK_KEYS = ['id', 'original_url', 'normalized_url', 'source_domain', 'title', 'display_title', 'note', 'is_favorite', 'content_type', 'metadata', 'ai', 'health', 'collections', 'collections_count', 'tags', 'created_at', 'updated_at'];
 
     private const METADATA_KEYS = ['status', 'title', 'description', 'site_name', 'favicon_url', 'preview_image_url', 'fetched_at', 'error_code'];
 
-    private const COLLECTION_KEYS = ['id', 'name', 'description', 'links_count', 'cover_images', 'created_at', 'updated_at'];
+    private const COLLECTION_KEYS = ['id', 'name', 'description', 'links_count', 'cover_images', 'is_public', 'share_url', 'created_at', 'updated_at'];
 
     private function assertTimestamp(mixed $value): void
     {

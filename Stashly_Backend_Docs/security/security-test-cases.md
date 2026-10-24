@@ -36,3 +36,6 @@
 | SEC-032 | AI output guards (DEC-039) | Quotes not in the supplied text, ids not owned by the caller, bad enums and unnumbered/over-long lists are dropped or rejected (502) |
 | SEC-033 | Guessing the 6-digit reset code (DEC-040) | 5 wrong guesses delete the code; expiry after 15 minutes; limits per e-mail and IP; wrong / unknown e-mail / expired answer identically |
 | SEC-034 | Reset code at rest and in transit | Stored only as a keyed HMAC; never logged; mail failure logs carry no address or code and do not change the API response |
+| SEC-035 | Dead-link check and SSRF (DEC-041) | A link or redirect to a private address is never requested; result `blocked`, stored state unchanged; limit 10/min |
+| SEC-036 | Public collection privacy (DEC-041) | Notes, tags, AI data, ids, e-mail never appear; private/unknown/switched-off slugs all give the same 404 |
+| SEC-037 | Bookmark import abuse (DEC-041) | Non-text, oversized, NUL-containing or markup-laden files are refused or neutralised; javascript:/file:/data: links skipped; limit 3/min |

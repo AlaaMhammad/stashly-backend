@@ -119,7 +119,7 @@ class OverviewEndpointsTest extends TestCase
             ->assertJsonPath('data.recent_links.0.original_url', 'https://example.com/12');
 
         $this->assertSame(['C1', 'C5', 'C4', 'C3'], array_column($response->json('data.quick_access'), 'name'));
-        $this->assertSame(['id', 'name', 'description', 'links_count', 'cover_images', 'created_at', 'updated_at'], array_keys($response->json('data.quick_access.0')));
+        $this->assertSame(['id', 'name', 'description', 'links_count', 'cover_images', 'is_public', 'share_url', 'created_at', 'updated_at'], array_keys($response->json('data.quick_access.0')));
 
         $this->getJson('/api/v1/home?recent_limit=20')->assertJsonCount(12, 'data.recent_links');
         $this->getJson('/api/v1/home?recent_limit=1')->assertJsonCount(1, 'data.recent_links');

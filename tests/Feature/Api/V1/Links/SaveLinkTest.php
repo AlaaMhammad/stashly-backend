@@ -51,6 +51,7 @@ class SaveLinkTest extends TestCase
                 'is_favorite', 'content_type',
                 'metadata' => ['status', 'title', 'description', 'site_name', 'favicon_url', 'preview_image_url', 'fetched_at', 'error_code'],
                 'ai' => ['summary', 'tags', 'generated_at'],
+                'health' => ['is_broken', 'last_checked_at'],
                 'collections', 'collections_count', 'tags', 'created_at', 'updated_at',
             ]]])
             ->assertJsonPath('data.link.original_url', 'https://WWW.YouTube.com/watch?v=abc&utm_source=share#t=10')

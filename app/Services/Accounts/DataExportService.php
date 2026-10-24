@@ -32,9 +32,10 @@ class DataExportService
     private const CHUNK = 500;
 
     /**
+     * @param  bool  $withAiData  GET /links/export (DEC-041): each link also carries ai_insights and ai_action_plan
      * @return Generator<int, string> JSON fragments; concatenated they form the document
      */
-    public function stream(User $user, Request $request): Generator
+    public function stream(User $user, Request $request, bool $withAiData = false): Generator
     {
         yield '{"schema_version":'.self::SCHEMA_VERSION
             .',"exported_at":'.$this->json(ApiDate::format(now()))
@@ -59,7 +60,12 @@ class DataExportService
         yield ',"links":[';
         $first = true;
         foreach ($this->chunks($user->links()->with(['collections', 'tags'])) as $link) {
-            yield ($first ? '' : ',').$this->json(LinkResource::make($link)->resolve($request));
+            $item = LinkResource::make($link)->resolve($request);
+            if ($withAiData) {
+                $item['ai_insights'] = $link->ai_insights;
+                $item['ai_action_plan'] = $link->ai_action_plan;
+            }
+            yield ($first ? '' : ',').$this->json($item);
             $first = false;
         }
 

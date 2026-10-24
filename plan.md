@@ -190,6 +190,13 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [x] Tests (`PasswordResetTest`, 31), RouteMatrixTest at 40 operations, Postman updated, Arabic report `Stashly_Backend_Docs/تقارير/otp_mail_and_template_report.md`.
 - [ ] Open: real SMTP send on Hostinger, the e-mail viewed in real clients (Gmail/Outlook/Apple Mail), Android confirmation, MySQL run.
 
+### Phase 13 - Productivity suite (owner calls it "Phase 12"; owner-requested, DEC-041)
+
+- [x] Additive migrations: `collections.is_public/share_slug`, `links.is_broken/last_checked_at/sort_title` and search indexes.
+- [x] `POST /links/import`, `GET /links/export`, `GET /links/search`, `GET /links/broken`, `POST /links/{link}/check-health`, `POST /collections/{collection}/share`, `GET /public/collections/{slug}`; `HttpTransport` gained a HEAD method.
+- [x] Tests (`ImportExportTest`, `PublicCollectionTest`, `DeadLinkCheckTest`, `AdvancedSearchTest`), RouteMatrixTest at 47 operations, Postman updated (50 requests), Arabic report `Stashly_Backend_Docs/تقارير/productivity_suite_report.md`.
+- [ ] Open: import of real Chrome/Firefox/Safari exports, HTML export imported into a real browser, search timing on MySQL/MariaDB, a web page for shared collections, archive and last-viewed features if wanted, Android confirmation.
+
 ## 6. Global acceptance criteria
 
 - All endpoints in `Stashly_Backend_Docs/api/endpoints.md` implemented or explicitly blocked by a recorded decision.

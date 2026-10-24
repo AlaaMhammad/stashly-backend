@@ -21,6 +21,14 @@ class Collection extends Model
     ];
 
     /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return ['is_public' => 'boolean'];
+    }
+
+    /**
      * @var list<string>
      */
     protected $hidden = [

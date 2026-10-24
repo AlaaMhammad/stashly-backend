@@ -24,7 +24,7 @@ class CurlTransport implements HttpTransport
 
     public function __construct(private readonly string $userAgent = 'StashlyBot/1.0') {}
 
-    public function request(Target $target, float $timeoutSeconds, int $maxBytes): TransportResponse
+    public function request(Target $target, float $timeoutSeconds, int $maxBytes, string $method = 'GET'): TransportResponse
     {
         $status = 0;
         $headers = [];
@@ -34,8 +34,9 @@ class CurlTransport implements HttpTransport
         $decided = false;
 
         $handle = curl_init($target->url);
+        $head = $method === 'HEAD';
         $options = [
-            CURLOPT_HTTPGET => true,
+            ($head ? CURLOPT_NOBODY : CURLOPT_HTTPGET) => true,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_PROXY => '',
@@ -48,7 +49,8 @@ class CurlTransport implements HttpTransport
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_USERAGENT => $this->userAgent,
             CURLOPT_HTTPHEADER => [
-                'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.1',
+                // A health check only needs the status line; any content type will do.
+                $head ? 'Accept: */*' : 'Accept: text/html,application/xhtml+xml;q=0.9,*/*;q=0.1',
                 'Accept-Language: en,ar;q=0.8',
             ],
             CURLOPT_TIMEOUT_MS => max(1, (int) ceil($timeoutSeconds * 1000)),

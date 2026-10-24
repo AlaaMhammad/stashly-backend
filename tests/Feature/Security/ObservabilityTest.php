@@ -145,7 +145,7 @@ class ObservabilityTest extends TestCase
         $row->save();
         $this->app->instance(HttpTransport::class, new class implements HttpTransport
         {
-            public function request(Target $target, float $timeoutSeconds, int $maxBytes): TransportResponse
+            public function request(Target $target, float $timeoutSeconds, int $maxBytes, string $method = 'GET'): TransportResponse
             {
                 throw new RuntimeException('crash at https://private-host.example/very/private/path?secret=audit-url-secret');
             }

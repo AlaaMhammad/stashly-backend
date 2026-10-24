@@ -16,7 +16,7 @@ class FakeTransport implements HttpTransport
     /** @var array<string, list<TransportResponse|FetchFailure>> */
     private array $routes = [];
 
-    /** @var list<array{target: Target, timeout: float, maxBytes: int}> */
+    /** @var list<array{target: Target, timeout: float, maxBytes: int, method: string}> */
     public array $requests = [];
 
     /** Seconds each request pretends to take (really sleeps), for budget tests. */
@@ -29,9 +29,9 @@ class FakeTransport implements HttpTransport
         return $this;
     }
 
-    public function request(Target $target, float $timeoutSeconds, int $maxBytes): TransportResponse
+    public function request(Target $target, float $timeoutSeconds, int $maxBytes, string $method = 'GET'): TransportResponse
     {
-        $this->requests[] = ['target' => $target, 'timeout' => $timeoutSeconds, 'maxBytes' => $maxBytes];
+        $this->requests[] = ['target' => $target, 'timeout' => $timeoutSeconds, 'maxBytes' => $maxBytes, 'method' => $method];
 
         if ($this->delay > 0) {
             usleep((int) ($this->delay * 1_000_000));

@@ -64,8 +64,25 @@ return [
         'google_auth_per_minute' => 10,
         // POST /links/{link}/summarize and POST /ai/ask (DEC-038): per user; keeps the free Gemini quota usable.
         'ai_per_minute' => 10,
+        // DEC-041 (Phase 12): bookmark import, health check, library export, public feed.
+        'import_per_minute' => 3,
+        'check_health_per_minute' => 10,
+        'links_export_per_ten_minutes' => 5,
+        'public_feed_per_minute' => 60,
         'metadata_refresh_per_link_per_minute' => 1,
         'metadata_refresh_per_minute' => 5,
+    ],
+
+    // POST /links/import: links saved per call and upload size (DEC-041).
+    'import' => [
+        'max_links_per_request' => 100,
+        'max_file_kb' => 2048,
+    ],
+
+    // POST /links/{link}/check-health: one 5 second budget, up to 3 redirects (DEC-041).
+    'health' => [
+        'timeout_seconds' => 5,
+        'max_redirects' => 3,
     ],
 
     // Password reset by 6-digit code (DEC-040).

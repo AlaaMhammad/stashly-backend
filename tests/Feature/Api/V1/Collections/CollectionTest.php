@@ -53,6 +53,8 @@ class CollectionTest extends TestCase
                 'description' => 'Later',
                 'links_count' => 0,
                 'cover_images' => [],
+                'is_public' => false,
+                'share_url' => null,
                 'created_at' => '2026-10-16T09:30:12Z',
                 'updated_at' => '2026-10-16T09:30:12Z',
             ]]]);

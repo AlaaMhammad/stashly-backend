@@ -58,6 +58,15 @@ switch ($path) {
         header('Content-Type: text/html');
         echo '<html>down</html>';
         break;
+    case '/method':
+        header('Content-Type: application/json');
+        header('X-Seen-Method: '.$_SERVER['REQUEST_METHOD']);
+        header('X-Seen-Accept: '.($_SERVER['HTTP_ACCEPT'] ?? ''));
+        echo '{"body":"should never be read for HEAD"}';
+        break;
+    case '/gone':
+        http_response_code(404);
+        break;
     case '/slow':
         sleep(2);
         header('Content-Type: text/html');
@@ -127,6 +136,27 @@ PHP);
             $this->assertSame('StashlyTest/1.0', $seen['user-agent']);
             $this->assertStringContainsString('text/html', $seen['accept']);
         }
+    }
+
+    public function test_a_head_request_reads_the_status_and_headers_but_no_body(): void
+    {
+        $transport = new CurlTransport('StashlyTest/1.0');
+
+        $head = $transport->request($this->target('/method'), 5.0, 1024, 'HEAD');
+        $this->assertSame(200, $head->status);
+        $this->assertSame('HEAD', $head->headers['x-seen-method']);
+        $this->assertSame('*/*', $head->headers['x-seen-accept'], 'A health check accepts any content type.');
+        $this->assertSame('', $head->body);
+
+        $this->assertSame(404, $transport->request($this->target('/gone'), 5.0, 1024, 'HEAD')->status);
+        $this->assertSame(302, $transport->request($this->target('/redirect'), 5.0, 1024, 'HEAD')->status, 'Redirects are returned, not followed, for HEAD too.');
+    }
+
+    public function test_the_default_method_is_still_get(): void
+    {
+        $get = $this->request('/method');
+
+        $this->assertSame('GET', $get->headers['x-seen-method']);
     }
 
     public function test_redirects_are_returned_not_followed(): void

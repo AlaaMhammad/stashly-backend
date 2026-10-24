@@ -35,6 +35,13 @@ Update only after checking code and tests. Initial status is intentionally `NOT 
 | API-AI-004 | POST /links/{link}/action-plan | IN PROGRESS | `php artisan test --filter=ActionPlanTest` | Gemini faked (DEC-039). Cached in `ai_action_plan`; steps numbered by the server. **No real Gemini call made.** SQLite only. |
 | API-AI-005 | GET /links/{link}/related | IN PROGRESS | `php artisan test --filter=RelatedLinksTest` | Gemini faked (DEC-039). Own links only, hallucinated ids dropped. **No real Gemini call made.** SQLite only. |
 | API-AI-006 | POST /ai/suggest-collection | IN PROGRESS | `php artisan test --filter=SuggestCollectionTest` | Gemini faked (DEC-039). No collections = no provider call. **No real Gemini call made.** SQLite only. |
+| API-LINK-010 | POST /links/import | IN PROGRESS | `php artisan test --filter=ImportExportTest` | Netscape HTML and CSV, 100 per request with `offset` (DEC-041). Metadata of imported links is fetched by the existing queue worker. SQLite only; MySQL unverified. |
+| API-LINK-011 | GET /links/export | IN PROGRESS | `php artisan test --filter=ImportExportTest` | JSON (with AI data) and Netscape HTML, round trip tested. SQLite only. |
+| API-LINK-012 | GET /links/search | IN PROGRESS | `php artisan test --filter=AdvancedSearchTest` | `is_archived`/`last_viewed_at` have no backing feature (see DEC-041). Sub-50 ms on MariaDB/MySQL **not measured**. |
+| API-LINK-013 | GET /links/broken | IN PROGRESS | `php artisan test --filter=DeadLinkCheckTest` | SQLite only. |
+| API-LINK-014 | POST /links/{link}/check-health | IN PROGRESS | `php artisan test --filter=DeadLinkCheckTest` | Faked transport in tests (SSRF-guarded transport, not Http::fake); real HEAD verified against a local server (`CurlTransportTest`). |
+| API-COLL-007 | POST /collections/{collection}/share | IN PROGRESS | `php artisan test --filter=PublicCollectionTest` | SQLite only. |
+| API-PUB-001 | GET /public/collections/{slug} | IN PROGRESS | `php artisan test --filter=PublicCollectionTest` | Privacy leak tests included; no web page for humans (JSON only). |
 | API-COLL-001 | GET /collections | IN PROGRESS | `php artisan test --filter=CollectionTest` | Sort recent/name, keyset cursor, counts, covers (DEC-012). SQLite only; MySQL unverified (DEC-015). |
 | API-COLL-002 | POST /collections | IN PROGRESS | `php artisan test --filter=CollectionTest` | Case-insensitive unique name; 100 limit under concurrency. Collation behavior needs the MySQL run (DEC-015). |
 | API-COLL-003 | GET /collections/{collection} | IN PROGRESS | `php artisan test --filter=CollectionTest` | SQLite only; MySQL unverified (DEC-015). |

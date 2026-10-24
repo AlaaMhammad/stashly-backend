@@ -75,3 +75,10 @@ Return 429 `RATE_LIMITED` and `Retry-After`.
 - 6-digit code from `random_int`, 15-minute life, one active code per e-mail, stored as HMAC-SHA256 keyed with the app key, deleted on use / expiry / 5th wrong guess. Brute force: at most 5 guesses per code, 3 codes per hour per e-mail (about 15 guesses per hour in a million), plus per-IP limits.
 - Unknown e-mail, wrong code and expired code give the same 422. The reset e-mail is sent after the response so response timing does not depend on SMTP; a database write for known accounts remains a small timing difference.
 - Mail failures are logged without the address or the code, and never change the response.
+
+## Library tools (DEC-041)
+
+- Health check: every hop passes the metadata SSRF guard (public addresses only, ports 80/443) and the IP-pinned curl transport; HEAD, 5 s total, 3 redirects, body never read; a blocked target is reported as `blocked` and changes nothing. Limit 10/min per user. URLs are never logged.
+- Import: UTF-8 text only (NUL bytes, wrong extension or sniffed type refused), 2 MB, 100 links per request, 3 requests per minute; the file is only scanned (no fetching, no XML parser, no HTML rendering); titles are stripped of markup; only http/https links are kept; logs hold counts only.
+- Public sharing: explicit opt-in per collection, unguessable slug, the public view is a fixed allow-list of fields (name, description, owner display name, link title/normalized url/page description/date), 404 for unknown/private alike, per-IP rate limit. Anyone with the link can read it; sharing off takes effect at once.
+- HTML export escapes every value; the file is served as an attachment with `nosniff`.

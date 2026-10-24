@@ -43,6 +43,7 @@ class Link extends Model
         'user_id',
         'normalized_url_hash',
         'search_text',
+        'sort_title',
         'metadata_request_id',
         'metadata_pending_since',
         'metadata_attempts',
@@ -61,7 +62,9 @@ class Link extends Model
                 $link->metadata_description,
                 $link->note,
                 $link->source_domain,
+                $link->ai_summary,
             ]);
+            $link->sort_title = mb_substr(mb_strtolower((string) ($link->title ?? $link->metadata_title ?? $link->source_domain)), 0, 255);
         });
     }
 
@@ -76,6 +79,8 @@ class Link extends Model
             'metadata_pending_since' => 'datetime',
             'ai_tags' => 'array',
             'ai_generated_at' => 'datetime',
+            'is_broken' => 'boolean',
+            'last_checked_at' => 'datetime',
             'ai_insights' => 'array',
             'ai_action_plan' => 'array',
         ];

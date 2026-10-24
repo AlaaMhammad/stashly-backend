@@ -4,6 +4,7 @@ namespace App\Services\Links;
 
 use App\Services\Tags\TagService;
 use App\Support\Search\SearchText;
+use Carbon\Carbon;
 
 /**
  * Validated GET /links filters in canonical form (contract 4.3).
@@ -32,6 +33,14 @@ final class LinkFilters
         public readonly array $tags = [],
         public readonly ?int $savedWithinDays = null,
         public readonly string $sort = self::SORT_NEWEST,
+        // GET /links/search and GET /links/broken (DEC-041)
+        public readonly ?bool $hasAiSummary = null,
+        public readonly ?Carbon $dateFrom = null,
+        public readonly ?Carbon $dateTo = null,
+        public readonly bool $archivedOnly = false,
+        public readonly ?bool $broken = null,
+        public readonly string $sortField = 'created_at',
+        public readonly ?string $direction = null,
     ) {}
 
     /**
@@ -59,6 +68,46 @@ final class LinkFilters
     }
 
     /**
+     * GET /links/search: compound filters (all combine with AND) and an explicit sort field and direction.
+     * There is no archive concept, so is_archived=true matches nothing and false matches everything.
+     *
+     * @param  array<string, mixed>  $input  validated query parameters
+     */
+    public static function fromSearchInput(array $input): self
+    {
+        $flag = fn (string $key) => isset($input[$key]) ? in_array($input[$key], ['true', '1'], true) : null;
+        $tag = TagService::normalize((string) ($input['tag'] ?? ''));
+        $field = $input['sort'] ?? 'created_at';
+
+        return new self(
+            words: SearchText::words((string) ($input['query'] ?? '')),
+            favorite: $flag('is_favorite'),
+            collectionIds: self::list($input['collection_id'] ?? null),
+            tags: $tag === '' ? [] : [$tag],
+            hasAiSummary: $flag('has_ai_summary'),
+            dateFrom: self::date($input['date_from'] ?? null, false),
+            dateTo: self::date($input['date_to'] ?? null, true),
+            archivedOnly: $flag('is_archived') === true,
+            sortField: $field,
+            direction: $input['direction'] ?? ($field === 'title' ? 'asc' : 'desc'),
+        );
+    }
+
+    /**
+     * A date (Y-m-d) means the whole day; a date-time is taken as given. Always UTC.
+     */
+    public static function date(?string $value, bool $endOfDay): ?Carbon
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $date = Carbon::parse($value, 'UTC')->utc();
+
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1 ? ($endOfDay ? $date->endOfDay() : $date->startOfDay()) : $date;
+    }
+
+    /**
      * Comma list to sorted, de-duplicated, lowercased values.
      *
      * @return list<string>
@@ -80,6 +129,8 @@ final class LinkFilters
         return hash('sha256', json_encode([
             $this->words, $this->favorite, $this->contentTypes, $this->sources,
             $this->collectionIds, $this->tags, $this->savedWithinDays, $this->sort,
+            $this->hasAiSummary, $this->dateFrom?->toIso8601String(), $this->dateTo?->toIso8601String(),
+            $this->archivedOnly, $this->broken, $this->sortField, $this->direction,
         ]));
     }
 }

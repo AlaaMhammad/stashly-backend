@@ -247,7 +247,7 @@ class MetadataJobTest extends TestCase
         {
             public function __construct(private Link $link) {}
 
-            public function request(Target $target, float $timeoutSeconds, int $maxBytes): TransportResponse
+            public function request(Target $target, float $timeoutSeconds, int $maxBytes, string $method = 'GET'): TransportResponse
             {
                 // While this fetch is in flight, the user triggers a refresh.
                 $fresh = Link::find($this->link->id);
@@ -347,7 +347,7 @@ class MetadataJobTest extends TestCase
         });
         $this->app->instance(HttpTransport::class, new class implements HttpTransport
         {
-            public function request(Target $target, float $timeoutSeconds, int $maxBytes): TransportResponse
+            public function request(Target $target, float $timeoutSeconds, int $maxBytes, string $method = 'GET'): TransportResponse
             {
                 throw new RuntimeException('boom https://example.com/secret-path?token=abc');
             }
