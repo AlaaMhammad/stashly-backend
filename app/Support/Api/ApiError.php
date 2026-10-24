@@ -28,6 +28,12 @@ final class ApiError
 
     public const INVALID_GOOGLE_TOKEN = 'INVALID_GOOGLE_TOKEN';
 
+    public const AI_SERVICE_UNAVAILABLE = 'AI_SERVICE_UNAVAILABLE';
+
+    public const AI_TIMEOUT = 'AI_TIMEOUT';
+
+    public const AI_INVALID_RESPONSE = 'AI_INVALID_RESPONSE';
+
     public const FORBIDDEN = 'FORBIDDEN';
 
     public const NOT_FOUND = 'NOT_FOUND';

@@ -74,6 +74,8 @@ class Link extends Model
             'is_favorite' => 'boolean',
             'metadata_fetched_at' => 'datetime',
             'metadata_pending_since' => 'datetime',
+            'ai_tags' => 'array',
+            'ai_generated_at' => 'datetime',
         ];
     }
 

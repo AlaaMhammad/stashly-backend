@@ -46,6 +46,13 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-LINK-008 | `PUT /links/{link}/tags` | Bearer | Full replacement; max 20 tags |
 | API-LINK-009 | `POST /links/{link}/metadata/refresh` | Bearer | Retry metadata; 202; max once/min/link |
 
+## AI (2) - DEC-038
+
+| ID | Method + path | Auth | Key behavior |
+|---|---|---|---|
+| API-AI-001 | `POST /links/{link}/summarize` | Bearer | Gemini summary + 3-5 tag suggestions for an owned link; stored in `ai`, tags attached; 200 `{link}`; 404/422/502/503/504; 10 AI calls/min/user |
+| API-AI-002 | `POST /ai/ask` | Bearer | Body `query` (2-500); answer from the 30 most recent links; 200 `{query, answer, referenced_links[{id,title,url}]}`; same errors and limit |
+
 ## Collections (6)
 
 | ID | Method + path | Auth | Key behavior |

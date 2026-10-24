@@ -45,6 +45,7 @@ class RateLimitTest extends TestCase
             'link_save_per_minute' => 60,
             'export_per_ten_minutes' => 1,
             'google_auth_per_minute' => 10,
+            'ai_per_minute' => 10,
             'metadata_refresh_per_link_per_minute' => 1,
             'metadata_refresh_per_minute' => 5,
         ], config('stashly.rate_limits'));

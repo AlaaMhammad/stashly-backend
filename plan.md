@@ -169,6 +169,13 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [ ] Open: password change for Google-only users stays via forgot-password; e-mail verification at registration; sign-in provider in the export.
 - **Gate:** Android owner confirms the contract; a real-token smoke test passes.
 
+### Phase 10 - On-demand AI with Gemini (owner-requested extension, DEC-038)
+
+- [x] Additive migration (`links.ai_summary`, `ai_tags`, `ai_generated_at`); config `GEMINI_API_KEY`, `GEMINI_MODEL=gemini-3.5-flash-lite`, `GEMINI_TIMEOUT=20`; `/config` `ai.enabled`; preflight warning.
+- [x] `POST /links/{link}/summarize` and `POST /ai/ask`: synchronous, no cron/queue, owner-scoped, 503/504/502 error codes, `ai` limiter (10/min/user).
+- [x] Tests with a faked Gemini (54), RouteMatrixTest at 35 operations, Postman folder 09, Arabic report in `Stashly_Backend_Docs/تقارير/ai_features_report.md`.
+- [ ] Open: real Gemini smoke test with a real key (nothing has called Gemini yet), free-tier terms and quotas, Android confirmation, MySQL run.
+
 ## 6. Global acceptance criteria
 
 - All endpoints in `Stashly_Backend_Docs/api/endpoints.md` implemented or explicitly blocked by a recorded decision.

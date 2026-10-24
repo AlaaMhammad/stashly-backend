@@ -20,6 +20,7 @@
     <p>To provide and secure the service, show your library, prevent abuse and fix problems. [LEGAL BASIS if required.]</p>
 
     <h2>Who receives it</h2>
+    <p><strong>AI features:</strong> when you tap an AI action (summarize a link, ask your links), the titles, notes and page descriptions of the links involved (up to your 30 most recent for a question) and your question are sent to Google's Gemini API to produce the answer. They are not sent otherwise.</p>
     <p>Our hosting provider [NAME], our e-mail sending provider [NAME] (for password-reset e-mails), and [OTHERS]. We do not sell your data.</p>
 
     <h2>Where it is stored and for how long</h2>

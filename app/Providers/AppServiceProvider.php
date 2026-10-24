@@ -103,6 +103,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('link-save', fn (Request $request) => Limit::perMinute(self::limit('link_save_per_minute'))
             ->by(self::userOrIpKey($request)));
 
+        RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(self::limit('ai_per_minute'))
+            ->by(self::userOrIpKey($request)));
+
         RateLimiter::for('export', fn (Request $request) => Limit::perMinutes(10, self::limit('export_per_ten_minutes'))
             ->by(self::userOrIpKey($request)));
 

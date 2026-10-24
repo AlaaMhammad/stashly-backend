@@ -57,8 +57,15 @@ return [
         'export_per_ten_minutes' => 1,
         // POST /auth/google (DEC-035): the e-mail is unknown before the token is verified, so per IP.
         'google_auth_per_minute' => 10,
+        // POST /links/{link}/summarize and POST /ai/ask (DEC-038): per user; keeps the free Gemini quota usable.
+        'ai_per_minute' => 10,
         'metadata_refresh_per_link_per_minute' => 1,
         'metadata_refresh_per_minute' => 5,
+    ],
+
+    // POST /ai/ask sends at most this many of the user's most recent links to the model (DEC-038).
+    'ai' => [
+        'ask_max_links' => 30,
     ],
 
     // Sanctum bearer tokens are valid for 60 days; refresh issues a new 60-day token.

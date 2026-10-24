@@ -56,3 +56,10 @@ Return 429 `RATE_LIMITED` and `Retry-After`.
 - Keep dependencies patched; run dependency/security checks available in the project.
 - Configure backups and test restore.
 - CORS must allow only intended app/web origins; do not use permissive wildcard credentials.
+
+## On-demand AI (DEC-038)
+
+- Gemini key only in `GEMINI_API_KEY` (never in the URL: sent as `x-goog-api-key`), never logged or returned; provider errors become generic 503/504/502 without provider text.
+- Data sent to Google: title, note, page description, domain, AI summary, tags, and the user's question. Not sent: full URLs (they can hold tokens), e-mail, tokens, other users' data. Disclosed in the draft privacy page.
+- Saved page text is untrusted (prompt injection): it is sent inside quoted DATA sections with a system instruction not to follow it; the model's output is validated; `referenced_links` can only contain ids of the caller's own links; tags are normalized and capped.
+- Cost/abuse: 10 AI calls per minute per user (limiter `ai`), 20 s timeout, no retries, input fields clipped, at most 30 links per question.

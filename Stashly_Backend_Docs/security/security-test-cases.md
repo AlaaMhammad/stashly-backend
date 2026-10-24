@@ -29,3 +29,6 @@
 | SEC-025 | Logs after Google sign-in attempts | No token, claims or e-mail; reason code only |
 | SEC-026 | Pre-registered password after Google linking (DEC-037) | Linking clears the password and revokes sessions; the attacker's password and token both fail |
 | SEC-027 | Delete a Google-only account (DEC-036) | Needs a valid `id_token` for the linked Google account; foreign, expired, wrong-audience, unverified and missing tokens fail and nothing is deleted |
+| SEC-028 | AI endpoints and other users' links (DEC-038) | Summarize on another user's link is 404 and sends nothing; ask never sends or cites another user's links |
+| SEC-029 | AI key and content hygiene | The Gemini key is only in a request header, never in logs/responses/errors; link content, questions and tokens are not logged |
+| SEC-030 | AI prompt injection and made-up ids | Saved text stays in DATA sections; ids the model invents are dropped from `referenced_links` |

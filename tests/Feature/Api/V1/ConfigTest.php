@@ -28,6 +28,7 @@ class ConfigTest extends TestCase
                 'terms' => ['version' => '2026-10-01', 'url' => 'https://example.test/terms'],
                 'privacy' => ['url' => 'https://example.test/privacy'],
                 'auth' => ['google_enabled' => false],
+                'ai' => ['enabled' => false],
                 'limits' => [
                     'url_max_length' => 2048,
                     'title_max_length' => 300,

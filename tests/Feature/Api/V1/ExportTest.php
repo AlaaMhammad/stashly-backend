@@ -85,7 +85,7 @@ class ExportTest extends TestCase
         $this->assertSame(['news', 'tech'], $link['tags']);
         $this->assertSame('pending', $link['metadata']['status']);
         $this->assertSame(
-            ['id', 'original_url', 'normalized_url', 'source_domain', 'title', 'display_title', 'note', 'is_favorite', 'content_type', 'metadata', 'collections', 'collections_count', 'tags', 'created_at', 'updated_at'],
+            ['id', 'original_url', 'normalized_url', 'source_domain', 'title', 'display_title', 'note', 'is_favorite', 'content_type', 'metadata', 'ai', 'collections', 'collections_count', 'tags', 'created_at', 'updated_at'],
             array_keys($link),
         );
     }

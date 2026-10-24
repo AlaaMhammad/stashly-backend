@@ -64,6 +64,10 @@ class SystemController extends Controller
             'auth' => [
                 'google_enabled' => filled(config('services.google.client_id')),
             ],
+            // Additive (DEC-038): lets the app hide the AI buttons when the server has no Gemini key.
+            'ai' => [
+                'enabled' => filled(config('services.gemini.api_key')),
+            ],
             'limits' => $config['limits'],
         ], 200, [
             'Cache-Control' => 'public, max-age='.$config['config_cache_seconds'],

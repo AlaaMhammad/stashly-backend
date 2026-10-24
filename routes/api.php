@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AskAiController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CollectionController;
 use App\Http\Controllers\Api\V1\GoogleAuthController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Api\V1\LinkController;
 use App\Http\Controllers\Api\V1\LinkMetadataController;
 use App\Http\Controllers\Api\V1\LinkPreviewController;
 use App\Http\Controllers\Api\V1\LinkRelationsController;
+use App\Http\Controllers\Api\V1\LinkSummarizeController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SearchFilterController;
@@ -76,6 +78,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/links/{link}/metadata/refresh', [LinkMetadataController::class, 'refresh'])
         ->whereUlid('link')
         ->middleware('throttle:metadata-refresh');
+
+    // API-AI-001 (DEC-038)
+    Route::post('/links/{link}/summarize', LinkSummarizeController::class)
+        ->whereUlid('link')
+        ->middleware('throttle:ai');
+    // API-AI-002 (DEC-038)
+    Route::post('/ai/ask', AskAiController::class)->middleware('throttle:ai');
 
     // API-COLL-001
     Route::get('/collections', [CollectionController::class, 'index']);

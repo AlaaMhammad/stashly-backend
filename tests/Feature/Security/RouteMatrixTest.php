@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route as RouteFacade;
 use Tests\TestCase;
 
 /**
- * Release gate: the 33 contract operations (32 + POST /auth/google) exist exactly once, each with the
+ * Release gate: the 35 contract operations (32 + POST /auth/google + the two AI endpoints) exist exactly once, each with the
  * contract's authentication and rate limiter (API reference 1.1 and 2.x).
  */
 class RouteMatrixTest extends TestCase
@@ -24,6 +24,8 @@ class RouteMatrixTest extends TestCase
         'POST api/v1/auth/register' => ['register'],
         'POST api/v1/auth/login' => ['login'],
         'POST api/v1/auth/google' => ['google-auth'],
+        'POST api/v1/links/{link}/summarize' => ['ai'],
+        'POST api/v1/ai/ask' => ['ai'],
         'POST api/v1/auth/forgot-password' => ['forgot-password'],
         'POST api/v1/links/preview' => ['link-preview'],
         'POST api/v1/links' => ['link-save'],
@@ -38,7 +40,7 @@ class RouteMatrixTest extends TestCase
         'GET api/v1/me', 'PATCH api/v1/me', 'GET api/v1/me/stats', 'GET api/v1/me/export', 'DELETE api/v1/me',
         'POST api/v1/links/preview', 'POST api/v1/links', 'GET api/v1/links', 'GET api/v1/links/{link}',
         'PATCH api/v1/links/{link}', 'DELETE api/v1/links/{link}', 'PUT api/v1/links/{link}/collections',
-        'PUT api/v1/links/{link}/tags', 'POST api/v1/links/{link}/metadata/refresh',
+        'PUT api/v1/links/{link}/tags', 'POST api/v1/links/{link}/metadata/refresh', 'POST api/v1/links/{link}/summarize', 'POST api/v1/ai/ask',
         'GET api/v1/collections', 'POST api/v1/collections', 'GET api/v1/collections/{collection}',
         'PATCH api/v1/collections/{collection}', 'DELETE api/v1/collections/{collection}',
         'PATCH api/v1/collections/{collection}/links',
@@ -69,10 +71,10 @@ class RouteMatrixTest extends TestCase
         return app('router')->resolveMiddleware($route->gatherMiddleware(), $route->excludedMiddleware());
     }
 
-    public function test_exactly_the_33_contract_operations_are_routed(): void
+    public function test_exactly_the_35_contract_operations_are_routed(): void
     {
-        // The reference's 32 operations plus POST /auth/google (DEC-035).
-        $this->assertCount(33, self::OPERATIONS);
+        // The reference 32 operations plus POST /auth/google (DEC-035) and the two AI endpoints (DEC-038).
+        $this->assertCount(35, self::OPERATIONS);
         $this->assertEqualsCanonicalizing(self::OPERATIONS, array_keys($this->apiRoutes()));
     }
 
@@ -98,7 +100,7 @@ class RouteMatrixTest extends TestCase
 
     public function test_the_named_limiters_exist_with_the_contract_numbers(): void
     {
-        foreach (['api', 'login', 'register', 'forgot-password', 'link-preview', 'link-save', 'export', 'metadata-refresh', 'google-auth'] as $name) {
+        foreach (['api', 'login', 'register', 'forgot-password', 'link-preview', 'link-save', 'export', 'metadata-refresh', 'google-auth', 'ai'] as $name) {
             $this->assertNotNull(app(RateLimiter::class)->limiter($name), "limiter $name");
         }
     }

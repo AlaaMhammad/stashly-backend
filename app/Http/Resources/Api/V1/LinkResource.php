@@ -44,6 +44,12 @@ class LinkResource extends JsonResource
                 'fetched_at' => $this->metadata_fetched_at ? ApiDate::format($this->metadata_fetched_at) : null,
                 'error_code' => $this->metadata_error_code,
             ],
+            // Additive (DEC-038): filled by POST /links/{link}/summarize; nulls until then.
+            'ai' => [
+                'summary' => $this->ai_summary,
+                'tags' => $this->ai_tags ?? [],
+                'generated_at' => $this->ai_generated_at ? ApiDate::format($this->ai_generated_at) : null,
+            ],
             'collections' => $this->collections->map(fn (Collection $c) => ['id' => $c->id, 'name' => $c->name])->values()->all(),
             'collections_count' => $this->collections->count(),
             'tags' => $this->tags->map(fn (Tag $t) => $t->name)->values()->all(),

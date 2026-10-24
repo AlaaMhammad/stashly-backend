@@ -34,6 +34,8 @@ class Preflight extends Command
             $this->check('Terms/Privacy URLs and a final (non-draft) terms version are configured', filled(config('stashly.terms.url')) && filled(config('stashly.privacy.url')) && filled(config('stashly.terms.version')) && config('stashly.terms.version') !== 'draft-1', warn: true),
             // DEC-035: without it POST /auth/google answers 503 and GET /config reports auth.google_enabled=false.
             $this->check('Google sign-in client id is configured (GOOGLE_CLIENT_ID)', filled(config('services.google.client_id')), warn: true),
+            // DEC-038: without it the AI endpoints answer 503 AI_SERVICE_UNAVAILABLE and GET /config reports ai.enabled=false.
+            $this->check('AI assistant key is configured (GEMINI_API_KEY)', filled(config('services.gemini.api_key')), warn: true),
             $this->check('App version limits are set', filled(config('stashly.app_versions.min_supported')) && filled(config('stashly.app_versions.latest')), warn: true),
             $this->check('Database user is not root', config('database.connections.'.config('database.default').'.username') !== 'root', warn: true),
             $this->check('LOG_LEVEL is not debug', config('logging.channels.'.config('logging.default').'.level', 'debug') !== 'debug', warn: true),

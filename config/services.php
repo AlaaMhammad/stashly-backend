@@ -22,6 +22,15 @@ return [
         'jwks_url' => 'https://www.googleapis.com/oauth2/v3/certs',
     ],
 
+    // On-demand AI (DEC-038): Google Gemini REST API, synchronous, no queue or cron. Empty key =
+    // the AI endpoints answer 503 AI_SERVICE_UNAVAILABLE and GET /config reports ai.enabled=false.
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY') ?: null,
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        'timeout' => (int) env('GEMINI_TIMEOUT', 20),
+        'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],
