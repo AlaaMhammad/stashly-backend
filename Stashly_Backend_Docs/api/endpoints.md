@@ -46,12 +46,18 @@ Base prefix: `/api/v1`. `Public` means no bearer token. All other endpoints requ
 | API-LINK-008 | `PUT /links/{link}/tags` | Bearer | Full replacement; max 20 tags |
 | API-LINK-009 | `POST /links/{link}/metadata/refresh` | Bearer | Retry metadata; 202; max once/min/link |
 
-## AI (2) - DEC-038
+## AI (6) - DEC-038, DEC-039
 
 | ID | Method + path | Auth | Key behavior |
 |---|---|---|---|
 | API-AI-001 | `POST /links/{link}/summarize` | Bearer | Gemini summary + 3-5 tag suggestions for an owned link; stored in `ai`, tags attached; 200 `{link}`; 404/422/502/503/504; 10 AI calls/min/user |
 | API-AI-002 | `POST /ai/ask` | Bearer | Body `query` (2-500); answer from the 30 most recent links; 200 `{query, answer, referenced_links[{id,title,url}]}`; same errors and limit |
+| API-AI-003 | `POST /links/{link}/key-points` | Bearer | Reader insights `{link_id, insights{key_takeaways[{point,explanation}], memorable_quotes[], estimated_read_time_minutes, difficulty_level}}`; cached, `?refresh=true` recomputes |
+| API-AI-004 | `POST /links/{link}/action-plan` | Bearer | `{link_id, action_plan{objective, steps[{step_number,title,description,action_item}]}}`; cached, `?refresh=true` recomputes |
+| API-AI-005 | `GET /links/{link}/related` | Bearer | `{source_link_id, related_links[{id,title,url,similarity_reason}]}` from the user's 30 most recent other links; not cached |
+| API-AI-006 | `POST /ai/suggest-collection` | Bearer | Body `title*`, `url*`, `description`; `{suggested_collection_id|null, suggested_collection_name|null, confidence, reason}` |
+
+All six AI endpoints share the 10 calls/min/user `ai` limiter; errors 503 `AI_SERVICE_UNAVAILABLE`, 504 `AI_TIMEOUT`, 502 `AI_INVALID_RESPONSE`.
 
 ## Collections (6)
 

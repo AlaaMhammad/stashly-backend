@@ -176,6 +176,13 @@ Do not silently resolve contradictions or fill gaps with guessed product behavio
 - [x] Tests with a faked Gemini (54), RouteMatrixTest at 35 operations, Postman folder 09, Arabic report in `Stashly_Backend_Docs/تقارير/ai_features_report.md`.
 - [ ] Open: real Gemini smoke test with a real key (nothing has called Gemini yet), free-tier terms and quotas, Android confirmation, MySQL run.
 
+### Phase 11 - Four core AI link enhancements (owner-requested extension, DEC-039)
+
+- [x] Additive migration (`links.ai_insights`, `links.ai_action_plan`, JSON, nullable); `POST /links/{link}/key-points`, `POST /links/{link}/action-plan` (cached, `?refresh=true`), `GET /links/{link}/related`, `POST /ai/suggest-collection`.
+- [x] Synchronous, no cron/queue; shared `ai` limiter; owner-scoped; hallucinated ids and unverified quotes dropped; 503/504/502 error codes.
+- [x] 4 test files with a faked Gemini, RouteMatrixTest at 39 operations, Postman folder 09 (6 requests), Arabic report `Stashly_Backend_Docs/تقارير/ai_advanced_features_report.md`.
+- [ ] Open: real Gemini smoke test (nothing has called Gemini yet), cache invalidation when link text changes, Android confirmation, MySQL run.
+
 ## 6. Global acceptance criteria
 
 - All endpoints in `Stashly_Backend_Docs/api/endpoints.md` implemented or explicitly blocked by a recorded decision.

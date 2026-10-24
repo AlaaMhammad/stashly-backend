@@ -32,3 +32,5 @@
 | SEC-028 | AI endpoints and other users' links (DEC-038) | Summarize on another user's link is 404 and sends nothing; ask never sends or cites another user's links |
 | SEC-029 | AI key and content hygiene | The Gemini key is only in a request header, never in logs/responses/errors; link content, questions and tokens are not logged |
 | SEC-030 | AI prompt injection and made-up ids | Saved text stays in DATA sections; ids the model invents are dropped from `referenced_links` |
+| SEC-031 | AI enhancements and other users' data (DEC-039) | key-points/action-plan/related on another user's link are 404 and send nothing; related and suggest-collection never send or return another user's links/collections |
+| SEC-032 | AI output guards (DEC-039) | Quotes not in the supplied text, ids not owned by the caller, bad enums and unnumbered/over-long lists are dropped or rejected (502) |

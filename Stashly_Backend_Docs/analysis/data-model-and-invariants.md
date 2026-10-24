@@ -6,6 +6,7 @@ This is a logical model, not a final migration specification. Inspect the reposi
 - ULID ID.
 - display name, unique email, password hash, terms acceptance/version fields as required by implementation.
 - Linking Google to an existing account sets `password` to NULL (DEC-037); `password_set` in the API user object is `password IS NOT NULL` (DEC-036).
+- AI cache (DEC-039): `links.ai_insights` and `links.ai_action_plan` (JSON, nullable) hold the last key-points / action-plan result; replaced only by `?refresh=true`, removed with the link, not part of the API link object.
 - AI (DEC-038): `links.ai_summary` (text), `ai_tags` (json list of normalized names, at most 5) and `ai_generated_at` (UTC), all nullable; set only by POST /links/{link}/summarize and removed with the link.
 - Google Sign-In (DEC-035): nullable unique `google_id` (Google's `sub`), nullable `avatar_url` (stored, not exposed) and a nullable password hash (Google-only accounts have none; password login rejects them like unknown e-mails).
 - Sanctum tokens or equivalent token table.

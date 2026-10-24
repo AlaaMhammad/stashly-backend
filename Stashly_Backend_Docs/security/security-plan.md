@@ -63,3 +63,9 @@ Return 429 `RATE_LIMITED` and `Retry-After`.
 - Data sent to Google: title, note, page description, domain, AI summary, tags, and the user's question. Not sent: full URLs (they can hold tokens), e-mail, tokens, other users' data. Disclosed in the draft privacy page.
 - Saved page text is untrusted (prompt injection): it is sent inside quoted DATA sections with a system instruction not to follow it; the model's output is validated; `referenced_links` can only contain ids of the caller's own links; tags are normalized and capped.
 - Cost/abuse: 10 AI calls per minute per user (limiter `ai`), 20 s timeout, no retries, input fields clipped, at most 30 links per question.
+
+### AI link enhancements (DEC-039)
+
+- Same key handling, rate limit (shared `ai` limiter) and prompt-injection stance as DEC-038. Extra guards: `memorable_quotes` must occur in the supplied text, `related` and `suggest-collection` only ever return ids of the caller's own links/collections, `step_number` is server-assigned, enums are validated.
+- `suggest-collection` sends the host, never the full URL; logs hold only the reason code, never titles, URLs or the request body.
+- A GET (`related`) triggers a provider call; it is authenticated and rate limited like the POSTs.

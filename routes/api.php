@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\CollectionController;
 use App\Http\Controllers\Api\V1\GoogleAuthController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\LinkController;
+use App\Http\Controllers\Api\V1\LinkInsightsController;
 use App\Http\Controllers\Api\V1\LinkMetadataController;
 use App\Http\Controllers\Api\V1\LinkPreviewController;
 use App\Http\Controllers\Api\V1\LinkRelationsController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Api\V1\LinkSummarizeController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SearchFilterController;
+use App\Http\Controllers\Api\V1\SuggestCollectionController;
 use App\Http\Controllers\Api\V1\SystemController;
 use App\Http\Controllers\Api\V1\TagController;
 use Illuminate\Support\Facades\Route;
@@ -85,6 +87,12 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('throttle:ai');
     // API-AI-002 (DEC-038)
     Route::post('/ai/ask', AskAiController::class)->middleware('throttle:ai');
+    // API-AI-003..005 (DEC-039)
+    Route::post('/links/{link}/key-points', [LinkInsightsController::class, 'keyPoints'])->whereUlid('link')->middleware('throttle:ai');
+    Route::post('/links/{link}/action-plan', [LinkInsightsController::class, 'actionPlan'])->whereUlid('link')->middleware('throttle:ai');
+    Route::get('/links/{link}/related', [LinkInsightsController::class, 'related'])->whereUlid('link')->middleware('throttle:ai');
+    // API-AI-006 (DEC-039)
+    Route::post('/ai/suggest-collection', SuggestCollectionController::class)->middleware('throttle:ai');
 
     // API-COLL-001
     Route::get('/collections', [CollectionController::class, 'index']);

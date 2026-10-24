@@ -76,6 +76,8 @@ class Link extends Model
             'metadata_pending_since' => 'datetime',
             'ai_tags' => 'array',
             'ai_generated_at' => 'datetime',
+            'ai_insights' => 'array',
+            'ai_action_plan' => 'array',
         ];
     }
 
